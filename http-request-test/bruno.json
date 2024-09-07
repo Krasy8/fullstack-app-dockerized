@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "springboot-react-fullstack-app",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

@@ -1,0 +1,165 @@
+import React, {useState} from 'react';
+import {PlusOutlined} from '@ant-design/icons';
+import {
+    Button,
+    Col,
+    Drawer, Empty,
+    Form,
+    Input,
+    Row,
+    Select,
+    Space
+} from 'antd';
+
+import {addNewStudent} from "../client";
+import ProgressSpin from "./Spin";
+import {successNotification, errorNotification} from "./Notification";
+
+
+const {Option} = Select;
+const returnSpin = () => {
+    return <ProgressSpin/>;
+}
+
+
+function AddNewStudent({fetchStudents}, students) {
+    const [open, setOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const showDrawer = () => {
+        setOpen(true);
+    };
+
+    const onClose = () => {
+        setOpen(false);
+    };
+
+    const onFinish = student => {
+        setSubmitting(true);
+        console.log(JSON.stringify(student, null, 2))
+        addNewStudent(student)
+            .then(() => {
+                console.log("new student added")
+                onClose();
+                successNotification(
+                    "New Student has been successfully added",
+                    `A new account for ${student.name} has been created on the system`)
+                fetchStudents();
+            }).catch(err => {
+                console.log(err);
+                err.response.json().then(res => {
+                    console.log(res)
+                    errorNotification("Something went wrong...",
+                        `${res.message} [${res.status}] [${res.error}]]`,
+                        "bottomLeft")
+                });
+            }).finally(() => setSubmitting(false));
+    };
+
+    const onFinishFailed = errorInfo => {
+        alert(JSON.stringify(errorInfo, null, 2))
+    }
+
+    const empty = (students) => {
+        if (students.length <=0){
+            return <Empty/>
+        }
+    }
+
+    return (
+        <>
+            <Button type="primary"
+                    onClick={showDrawer}
+                    icon={<PlusOutlined/>}
+                    style={{marginRight: '10px'}}>
+                New student
+            </Button>
+            <br/><br/>
+            <>
+                {empty(students)}
+            </>
+
+            <Drawer
+                title="Create a new account"
+                width={720}
+                onClose={onClose}
+                open={open}
+                styles={{
+                    body: {
+                        paddingBottom: 80,
+                    },
+                }}
+            >
+                <Form
+                    layout="vertical"
+                    onFinishFailed={onFinishFailed}
+                    onFinish={onFinish}
+                    requiredMark={true}
+                    autoComplete="off"
+                >
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <Form.Item
+                                name="name"
+                                label="Name"
+                                rules={[{
+                                    required: true, message: 'Please enter user name',
+                                },]}
+                            >
+                                <Input placeholder="Please enter user name"/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <Form.Item
+                                name="gender"
+                                label="Gender"
+                                rules={[{
+                                    required: true, message: 'Please select your gender',
+                                },]}
+                            >
+                                <Select placeholder="Please select an owner">
+                                    <Option value="FEMALE">FEMALE</Option>
+                                    <Option value="MALE">MALE</Option>
+                                    <Option value="OTHER">OTHER</Option>
+                                </Select>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row gutter={16}>
+                        <Col span={24}>
+                            <Form.Item
+                                name="email"
+                                label="Email"
+                                rules={[{
+                                    required: true, message: 'Please choose the approver',
+                                },]}
+                            >
+                                <Input placeholder="Please enter user email address"/>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col span={12}>
+                            <Form.Item>
+                                <Space>
+                                    <Button type="primary" htmlType="submit">
+                                        Submit
+                                    </Button>
+                                    <Button onClick={onClose}>
+                                        Cancel
+                                    </Button>
+                                </Space>
+                            </Form.Item>
+                        </Col>
+                    </Row>
+                    <Row>
+                        {submitting && returnSpin()}
+                    </Row>
+                </Form>
+            </Drawer>
+        </>);
+}
+
+export default AddNewStudent;

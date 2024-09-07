@@ -1,0 +1,8 @@
+name: springboot-react-fullstack-app
+
+services:
+  backend:
+    image: "krasy8/springboot-react-fullstack:latest"
+    ports:
+      - "89:8080"
+    restart: always
