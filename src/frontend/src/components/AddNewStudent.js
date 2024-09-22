@@ -25,6 +25,7 @@ const returnSpin = () => {
 function AddNewStudent({fetchStudents}, students) {
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [destroyOnClose, setDestroyOnClose] = useState(false);
 
     const showDrawer = () => {
         setOpen(true);
@@ -43,8 +44,9 @@ function AddNewStudent({fetchStudents}, students) {
                 onClose();
                 successNotification(
                     "New Student has been successfully added",
-                    `A new account for ${student.name} has been created on the system`)
+                    `A new account for ${student.name} has been created on the system`);
                 fetchStudents();
+                setDestroyOnClose(true);
             }).catch(err => {
                 console.log(err);
                 err.response.json().then(res => {
@@ -84,6 +86,7 @@ function AddNewStudent({fetchStudents}, students) {
                 width={720}
                 onClose={onClose}
                 open={open}
+                destroyOnClose={destroyOnClose}
                 styles={{
                     body: {
                         paddingBottom: 80,
