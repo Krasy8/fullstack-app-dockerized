@@ -10,18 +10,61 @@ const checkStatus = response => {
     return Promise.reject(error);
 }
 
+const getCsrfToken = () => {
+    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+    return cookieValue ? cookieValue.split('=')[1] : null;
+};
+
+// StudentController API calls
 export const getAllStudents = () =>
-    fetch("api/v1/students")
-        .then(checkStatus);
+    fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+        },
+        credentials: 'include', // Include cookies for session management
+    }).then(checkStatus);
 
 export const addNewStudent = student =>
-    fetch("api/v1/students", {
-        headers: {'Content-Type': 'application/json'},
+    fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+        },
         method: 'POST',
-        body: JSON.stringify(student)
+        credentials: 'include', // Include cookies for session management
+        body: JSON.stringify(student),
     }).then(checkStatus);
 
 export const deleteStudent = studentId =>
-    fetch(`api/v1/students/${studentId}`, {
+    fetch(`/api/v1/students/${studentId}`, {
         method: 'DELETE'
     }).then(checkStatus);
+
+// AdminController API calls
+export const loginAdmin = async (credentials) => {
+    const csrfToken = getCsrfToken();
+    return fetch("http://localhost:8080/api/v1/admin/login", { // Ensure the full backend URL
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': csrfToken // Include CSRF token
+        },
+        method: 'POST',
+        credentials: 'include', // Include cookies for CSRF and session management
+        body: JSON.stringify(credentials)
+    }).then(checkStatus);
+};
+
+export const registerAdmin = async (adminData) => {
+    const csrfToken = getCsrfToken();
+    return fetch("http://localhost:8080/api/v1/admin/register", {
+        headers: {
+            'Content-Type': 'application/json',
+            'X-XSRF-TOKEN': csrfToken // Include CSRF token
+        },
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify(adminData)
+    }).then(checkStatus);
+};

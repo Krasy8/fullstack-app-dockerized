@@ -1,22 +1,44 @@
-import React, { useState } from 'react';
-import { Tabs, Form, Input, Button, Space } from 'antd';
+import React from 'react';
+import {Tabs, Form, Input, Button, Space, message} from 'antd';
 import { GoogleOutlined, AppleOutlined } from '@ant-design/icons';
-import './AuthForm.css'; // Import custom styles
+import './AuthForm.css';
+import {loginAdmin, registerAdmin} from "../client";
+import {useNavigate} from "react-router-dom"; // Import custom styles
 
 const { TabPane } = Tabs;
 
-const AuthForm = () => {
+const AuthForm = ({ onLoginSuccess }) => {
     const [form] = Form.useForm();
+    const navigate = useNavigate();
 
-    const onLoginFinish = (values) => {
+    const onLoginFinish = async (values) => {
         console.log('Login values:', values);
-        // Perform login logic here
+        try {
+            await loginAdmin(values);
+            message.success('Login successful');
+            onLoginSuccess(); // Call the success handler
+            // Redirect to the main page after successful login
+            navigate('/');
+        } catch (error) {
+            console.log('Login failed:', error);
+            message.error('Login failed. Please check your credentials.');
+        }
     };
 
-    const onRegisterFinish = (values) => {
-        console.log('Registration values:', values);
-        // Perform registration logic here
-    };
+    const onRegisterFinish = async (values) => {
+        console.log('Register values:', values);
+        try {
+            await registerAdmin(values);
+            message.success('Registration successful! Redirecting...');
+            setTimeout(() => {
+                navigate('/'); // Redirect to the main page
+            }, 1000);
+            form.resetFields();
+        } catch (error) {
+            console.log('Registration failed:', error);
+            message.error('Registration failed. Please try again.');
+        }
+    }
 
     const handleGoogleLogin = () => {
         console.log('Google login clicked');
@@ -92,6 +114,22 @@ const AuthForm = () => {
                             layout="vertical"
                             onFinish={onRegisterFinish}
                         >
+                            <Form.Item
+                                label="First Name"
+                                name="firstName"
+                                rules={[{required: true, message: 'Please input your First Name!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Last Name"
+                                name="lastName"
+                                rules={[{required: true, message: 'Please input your Last Name!' }]}
+                            >
+                                <Input />
+                            </Form.Item>
+
                             <Form.Item
                                 label="Username"
                                 name="username"

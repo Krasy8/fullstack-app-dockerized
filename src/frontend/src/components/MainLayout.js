@@ -13,7 +13,6 @@ import {
     Menu,
     Table,
     theme,
-    Empty,
     Badge,
     Tag,
     Flex,
@@ -150,13 +149,17 @@ function MainLayout() {
                 console.log(data);
                 setStudents(data);
             }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res)
-                errorNotification("Something went wrong...",
-                    `${res.message()} [${res.status}] [${res.error}]]`
-                )
-            });
+            if (err.response) {
+                err.response.json().then(res => {
+                    console.log(res);
+                    errorNotification("Something went wrong...",
+                        `${res.message} [${res.status}] [${res.error}]`
+                    );
+                });
+            } else {
+                console.error('Fetch failed:', err); // Catch the undefined error
+                errorNotification("Something went wrong...", "Could not fetch students.");
+            }
         }).finally(() => setFetching(false));
 
     useEffect(() => {
@@ -189,7 +192,7 @@ function MainLayout() {
             rowKey={(student) => student.id}
         />;
     }
-
+    console.log('MainLayout rendered')
     return (
         <Layout
             style={{
