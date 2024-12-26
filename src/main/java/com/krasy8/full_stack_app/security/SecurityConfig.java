@@ -61,21 +61,11 @@ public class SecurityConfig {
                                 .requestMatchers("/authenticating").permitAll()
                                 .requestMatchers("/api/v1/admin/**").permitAll() //
                                 .requestMatchers("/api/v1/csrf/**").permitAll()
-                                .requestMatchers("/api/v1/students/**").authenticated() //.hasRole(MASTER.name())
-                                .anyRequest().permitAll()
+                                .requestMatchers("/api/v1/students/**").hasRole(Role.MASTER.name())
                 )
                 .addFilter(new JwtAuthorizationFilter(authManager(http), jwtUtil))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable
-//                        form -> form
-//                        .loginPage("http://localhost:3000/authenticating") // Set login form page
-//                        .permitAll()    // Allow everyone to access login page
-//                        .defaultSuccessUrl("http://localhost:3000/authorized", true) // Redirect after successful login
-//                        .usernameParameter("username")
-//                        .passwordParameter("password")
-//                )
-//                .logout(logout -> logout
-//                        .logoutSuccessUrl("/auth?logout") // Redirect after logout
                 );
 
         return http.build();

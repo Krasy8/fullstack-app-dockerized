@@ -45,24 +45,6 @@ public class UserController {
         }
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<String> login(@RequestBody User authUser) {
-//
-//        User user = userService.loginUser(authUser.getUsername(), authUser.getPassword());
-//
-//        try {
-//            Authentication authentication = authenticationManager.authenticate(
-//                    new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword(), user.getAuthorities())
-//            );
-//            SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//            logger.info("Authenticated user: {} with authorities: {}", user.getUsername(), user.getAuthorities());
-//            return ResponseEntity.ok("Logged in successfully with authorities: " + user.getAuthorities().toString());
-//        } catch (AuthenticationException e) {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
-//        }
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User authUser) {
         try {
@@ -73,7 +55,7 @@ public class UserController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             // Generate JWT
-            String jwt = jwtUtil.generateToken(authentication.getName()); // Adjust method call if necessary
+            String jwt = jwtUtil.generateToken(authentication); // Adjust method call if necessary
 
             logger.info("Authenticated user: {} with authorities: {}", authUser.getUsername(), authentication.getAuthorities());
             return ResponseEntity.ok(jwt); // Return JWT to the client
