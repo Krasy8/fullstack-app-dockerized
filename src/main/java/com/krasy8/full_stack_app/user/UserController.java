@@ -1,5 +1,6 @@
 package com.krasy8.full_stack_app.user;
 
+import com.krasy8.full_stack_app.security.jwt.JwtUtil;
 import lombok.AllArgsConstructor;
 
 import org.slf4j.Logger;
@@ -29,6 +30,9 @@ public class UserController {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
+    JwtUtil jwtUtil;
+
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
@@ -41,20 +45,39 @@ public class UserController {
         }
     }
 
+//    @PostMapping("/login")
+//    public ResponseEntity<String> login(@RequestBody User authUser) {
+//
+//        User user = userService.loginUser(authUser.getUsername(), authUser.getPassword());
+//
+//        try {
+//            Authentication authentication = authenticationManager.authenticate(
+//                    new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword(), user.getAuthorities())
+//            );
+//            SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//            logger.info("Authenticated user: {} with authorities: {}", user.getUsername(), user.getAuthorities());
+//            return ResponseEntity.ok("Logged in successfully with authorities: " + user.getAuthorities().toString());
+//        } catch (AuthenticationException e) {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+//        }
+//    }
+
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User authUser) {
-
-        User user = userService.loginUser(authUser.getUsername(), authUser.getPassword());
-
+    public ResponseEntity<?> login(@RequestBody User authUser) {
         try {
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword(), user.getAuthorities())
+                    new UsernamePasswordAuthenticationToken(authUser.getUsername(), authUser.getPassword())
             );
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            logger.info("Authenticated user: {} with authorities: {}", user.getUsername(), user.getAuthorities());
-            return ResponseEntity.ok("Logged in successfully with authorities: " + user.getAuthorities().toString());
-        } catch (AuthenticationException e) {
+            // Generate JWT
+            String jwt = jwtUtil.generateToken(authentication.getName()); // Adjust method call if necessary
+
+            logger.info("Authenticated user: {} with authorities: {}", authUser.getUsername(), authentication.getAuthorities());
+            return ResponseEntity.ok(jwt); // Return JWT to the client
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }

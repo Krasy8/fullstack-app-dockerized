@@ -1,5 +1,7 @@
 package com.krasy8.full_stack_app.security;
 
+import com.krasy8.full_stack_app.security.jwt.JwtAuthorizationFilter;
+import com.krasy8.full_stack_app.security.jwt.JwtUtil;
 import com.krasy8.full_stack_app.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -10,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +27,8 @@ public class SecurityConfig {
     private UserService userService;
     @Autowired
     private PasswordConfig passwordConfig;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,9 +47,6 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", corsConfig);
 
         http
-//                .sessionManagement(sessionManagement -> sessionManagement
-//                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // or .IF_REQUIRED, .NEVER, etc.
-//                )
                 .cors(c -> c.configurationSource(source))
                 .csrf(AbstractHttpConfigurer::disable
 //                        .ignoringRequestMatchers("/api/v1/admin/**")
@@ -62,6 +64,8 @@ public class SecurityConfig {
                                 .requestMatchers("/api/v1/students/**").authenticated() //.hasRole(MASTER.name())
                                 .anyRequest().permitAll()
                 )
+                .addFilter(new JwtAuthorizationFilter(authManager(http), jwtUtil))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable
 //                        form -> form
 //                        .loginPage("http://localhost:3000/authenticating") // Set login form page

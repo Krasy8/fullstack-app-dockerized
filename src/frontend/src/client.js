@@ -32,14 +32,28 @@ export const fetchCsrfToken = async () => {
 
 // StudentController API calls
 export const getAllStudents = async () => {
+    const jwtToken = localStorage.getItem('jwtToken');
+
+    if (!jwtToken) {
+        throw new Error('No JWT token found. Please log in.');
+    }
     return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${jwtToken}`
             // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
         },
         credentials: 'include', // Include cookies for session management
-    }).then(checkStatus);
+    }).then(response => {
+        if (response.ok) {
+            console.log(response);
+            return response; // Parse the response if successful
+        }
+        throw new Error('Failed to fetch students');
+    }).catch(error => {
+        console.error('Fetch students error:', error);
+    });
 }
 
 // export const getAllStudents = () =>
@@ -80,9 +94,26 @@ export const loginAdmin = async (credentials) => {
             // 'X-XSRF-TOKEN': csrfToken // Include CSRF token
         },
         method: 'POST',
-        credentials: 'include', // Include cookies for CSRF and session management
+        // credentials: 'include', // Include cookies for CSRF and session management
         body: JSON.stringify(credentials),
-    }).then(checkStatus);
+    }).then(response => {
+        console.log('Response status:', response.status); // Log response status
+        console.log('Response OK:', response.ok); // Log if response is OK
+
+        // Check if the response is OK
+        if (response.ok) {
+            return response.text(); // Response is plain text (JWT token)
+        } else {
+            return response.text().then(text => {
+                console.error('Login failed:', text); // Log error text from the response
+                throw new Error('Login failed');
+            });
+        }
+    }).then(async jwtToken => {
+        localStorage.setItem('jwtToken', await jwtToken);
+    }).catch(error => {
+        console.error('Login error', error);
+    });
 };
 
 export const registerAdmin = async (adminData) => {
