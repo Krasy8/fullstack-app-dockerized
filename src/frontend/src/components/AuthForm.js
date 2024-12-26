@@ -18,7 +18,7 @@ const AuthForm = ({ onLoginSuccess }) => {
             message.success('Login successful');
             onLoginSuccess(); // Call the success handler
             // Redirect to the main page after successful login
-            navigate('/');
+            navigate('/authorized');
         } catch (error) {
             console.log('Login failed:', error);
             message.error('Login failed. Please check your credentials.');

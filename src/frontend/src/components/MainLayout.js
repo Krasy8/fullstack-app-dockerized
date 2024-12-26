@@ -158,13 +158,13 @@ function MainLayout() {
                 });
             } else {
                 console.error('Fetch failed:', err); // Catch the undefined error
-                errorNotification("Something went wrong...", "Could not fetch students.");
+                errorNotification("Something went wrong...", err.message);
             }
         }).finally(() => setFetching(false));
 
     useEffect(() => {
         console.log("component is mounted");
-        fetchStudents();
+        fetchStudents().then(r => console.log(r));
     }, []);
 
     const renderStudents = () => {

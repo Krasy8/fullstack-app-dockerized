@@ -10,27 +10,55 @@ const checkStatus = response => {
     return Promise.reject(error);
 }
 
-const getCsrfToken = () => {
-    const cookieValue = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
-    return cookieValue ? cookieValue.split('=')[1] : null;
+// const getCsrfToken = () => {
+//     const cookieValue = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
+//     return cookieValue ? cookieValue.split('=')[1] : null;
+// };
+
+export const fetchCsrfToken = async () => {
+    const response = await fetch("http://localhost:8080/api/v1/csrf/csrf-token", {
+        method: 'GET',
+        credentials: 'include' // Include cookies for session management
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch CSRF token: ${response.statusText}`);
+    }
+
+    // const csrfToken = await response.json();
+    // console.log(csrfToken);
+    // return csrfToken.token; // Assuming the server sends the token in JSON format as { "token": "your-csrf-token-value" }
 };
 
 // StudentController API calls
-export const getAllStudents = () =>
-    fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
+export const getAllStudents = async () => {
+    return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+            // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
         },
         credentials: 'include', // Include cookies for session management
     }).then(checkStatus);
+}
+
+// export const getAllStudents = () =>
+//     fetchCsrfToken().then((csrfToken) =>
+//         fetch("http://localhost:8080/api/v1/students", {
+//             method: 'GET',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//                 'X-XSRF-TOKEN': csrfToken, // Use the token retrieved from fetchCsrfToken
+//             },
+//             credentials: 'include', // Include cookies for session management
+//         })
+//     ).then(checkStatus);
 
 export const addNewStudent = student =>
     fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
         headers: {
             'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+            // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
         },
         method: 'POST',
         credentials: 'include', // Include cookies for session management
@@ -44,24 +72,25 @@ export const deleteStudent = studentId =>
 
 // AdminController API calls
 export const loginAdmin = async (credentials) => {
-    const csrfToken = getCsrfToken();
+    // const csrfToken = getCsrfToken();
+    // console.log(credentials, csrfToken);
     return fetch("http://localhost:8080/api/v1/admin/login", { // Ensure the full backend URL
         headers: {
             'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': csrfToken // Include CSRF token
+            // 'X-XSRF-TOKEN': csrfToken // Include CSRF token
         },
         method: 'POST',
         credentials: 'include', // Include cookies for CSRF and session management
-        body: JSON.stringify(credentials)
+        body: JSON.stringify(credentials),
     }).then(checkStatus);
 };
 
 export const registerAdmin = async (adminData) => {
-    const csrfToken = getCsrfToken();
+    // const csrfToken = getCsrfToken();
     return fetch("http://localhost:8080/api/v1/admin/register", {
         headers: {
             'Content-Type': 'application/json',
-            'X-XSRF-TOKEN': csrfToken // Include CSRF token
+            // 'X-XSRF-TOKEN': csrfToken // Include CSRF token
         },
         method: 'POST',
         credentials: 'include',
