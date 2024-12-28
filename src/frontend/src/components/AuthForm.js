@@ -50,140 +50,148 @@ const AuthForm = ({ onLoginSuccess }) => {
         // Trigger Apple login here
     };
 
+    const items = [
+        {
+            key: '1',
+            label: 'Login',
+            children: (
+                <Form
+                    form={form}
+                    name="loginForm"
+                    layout="vertical"
+                    onFinish={onLoginFinish}
+                >
+                    <Form.Item
+                        label="Username or Email"
+                        name="username"
+                        rules={[{ required: true, message: 'Please input your username or email!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[{ required: true, message: 'Please input your password!' }]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" block>
+                            Login
+                        </Button>
+                    </Form.Item>
+                </Form>
+            ),
+        },
+        {
+            key: '2',
+            label: 'Register',
+            children: (
+                <Form
+                    form={form}
+                    name="registerForm"
+                    layout="vertical"
+                    onFinish={onRegisterFinish}
+                >
+                    <Form.Item
+                        label="First Name"
+                        name="firstName"
+                        rules={[{ required: true, message: 'Please input your First Name!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Last Name"
+                        name="lastName"
+                        rules={[{ required: true, message: 'Please input your Last Name!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Username"
+                        name="username"
+                        rules={[{ required: true, message: 'Please input your username!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Email"
+                        name="email"
+                        rules={[{ required: true, message: 'Please input your email!' }]}
+                    >
+                        <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Password"
+                        name="password"
+                        rules={[{ required: true, message: 'Please input your password!' }]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Confirm Password"
+                        name="confirm"
+                        dependencies={['password']}
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please confirm your password!',
+                            },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue('password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('The two passwords do not match!'));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" block>
+                            Register
+                        </Button>
+                    </Form.Item>
+                </Form>
+            ),
+        },
+    ];
+
     return (
         <div className="auth-container">
             <div className="auth-box">
-                <Tabs defaultActiveKey="1">
-                    <TabPane tab="Login" key="1">
-                        <Form
-                            form={form}
-                            name="loginForm"
-                            layout="vertical"
-                            onFinish={onLoginFinish}
+                <Tabs defaultActiveKey="1" items={items} />
+                <div style={{ textAlign: 'center', marginTop: 20 }}>
+                    <Space direction="vertical" style={{ width: '100%' }}>
+                        <Button
+                            icon={<GoogleOutlined />}
+                            onClick={handleGoogleLogin}
+                            style={{ backgroundColor: '#DB4437', color: 'white' }}
+                            className="auth-social-button"
                         >
-                            <Form.Item
-                                label="Username or Email"
-                                name="username"
-                                rules={[{ required: true, message: 'Please input your username or email!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
+                            Login with Google
+                        </Button>
 
-                            <Form.Item
-                                label="Password"
-                                name="password"
-                                rules={[{ required: true, message: 'Please input your password!' }]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" block>
-                                    Login
-                                </Button>
-                            </Form.Item>
-                        </Form>
-
-                        <div style={{textAlign: 'center', marginTop: 20}}>
-                            <Space direction="vertical" style={{width: '100%'}}>
-                                <Button
-                                    icon={<GoogleOutlined/>}
-                                    onClick={handleGoogleLogin}
-                                    style={{backgroundColor: '#DB4437', color: 'white'}}
-                                    className="auth-social-button"
-                                >
-                                    Login with Google
-                                </Button>
-
-                                <Button
-                                    icon={<AppleOutlined/>}
-                                    onClick={handleAppleLogin}
-                                    style={{backgroundColor: 'black', color: 'white'}}
-                                    className="auth-social-button"
-                                >
-                                    Login with Apple
-                                </Button>
-                            </Space>
-                        </div>
-                    </TabPane>
-
-                    <TabPane tab="Register" key="2">
-                        <Form
-                            form={form}
-                            name="registerForm"
-                            layout="vertical"
-                            onFinish={onRegisterFinish}
+                        <Button
+                            icon={<AppleOutlined />}
+                            onClick={handleAppleLogin}
+                            style={{ backgroundColor: 'black', color: 'white' }}
+                            className="auth-social-button"
                         >
-                            <Form.Item
-                                label="First Name"
-                                name="firstName"
-                                rules={[{required: true, message: 'Please input your First Name!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Last Name"
-                                name="lastName"
-                                rules={[{required: true, message: 'Please input your Last Name!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Username"
-                                name="username"
-                                rules={[{required: true, message: 'Please input your username!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Email"
-                                name="email"
-                                rules={[{ required: true, message: 'Please input your email!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Password"
-                                name="password"
-                                rules={[{ required: true, message: 'Please input your password!' }]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-
-                            <Form.Item
-                                label="Confirm Password"
-                                name="confirm"
-                                dependencies={['password']}
-                                rules={[
-                                    {
-                                        required: true,
-                                        message: 'Please confirm your password!',
-                                    },
-                                    ({ getFieldValue }) => ({
-                                        validator(_, value) {
-                                            if (!value || getFieldValue('password') === value) {
-                                                return Promise.resolve();
-                                            }
-                                            return Promise.reject(new Error('The two passwords do not match!'));
-                                        },
-                                    }),
-                                ]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
-
-                            <Form.Item>
-                                <Button type="primary" htmlType="submit" block>
-                                    Register
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    </TabPane>
-                </Tabs>
+                            Login with Apple
+                        </Button>
+                    </Space>
+                </div>
             </div>
         </div>
     );

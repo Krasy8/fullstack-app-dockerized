@@ -219,10 +219,24 @@ function MainLayout() {
                         style={{
                             margin: '16px 0',
                         }}
-                    >
-                        <Breadcrumb.Item>User</Breadcrumb.Item>
-                        <Breadcrumb.Item>Students</Breadcrumb.Item>
-                    </Breadcrumb>
+                        items={[
+                            {
+                                title: 'User',
+                            },
+                            {
+                                title: 'Students',
+                            },
+                            // {
+                            //     title: <a href="">Application Center</a>,
+                            // },
+                            // {
+                            //     title: <a href="">Application List</a>,
+                            // },
+                            // {
+                            //     title: 'An Application',
+                            // },
+                        ]}
+                    />
                     <div
                         style={{
                             padding: 24,
