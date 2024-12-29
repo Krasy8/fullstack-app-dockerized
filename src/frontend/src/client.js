@@ -1,14 +1,74 @@
 import fetch from 'unfetch';
 
-const checkStatus = response => {
-    if (response.ok) {
-        return response;
+// const checkStatus = response => {
+//     if (response.ok) {
+//         return response;
+//     }
+//     // convert non-2xx HTTP responses into errors:
+//     const error = new Error(response.statusText);
+//     error.response = response;
+//     return Promise.reject(error);
+// }
+
+const BASE_URL = "http://localhost:8080/api/vi";
+
+export const fetchApi = async (endpoint, options = {}) => {
+    const baseUrl = "http://localhost:8080/api/v1";
+    const jwtToken = localStorage.getItem("jwtToken");
+
+    if (!jwtToken) {
+        throw new Error("No JWT token found. Please log in.");
     }
-    // convert non-2xx HTTP responses into errors:
+
+    try {
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+            ...options,
+            headers: {
+                ...options.headers,
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${jwtToken}`,
+            },
+        });
+
+        if (!response.ok) {
+            // Attempt to parse error response if available
+            let errorMessage = `HTTP error ${response.status}`;
+            try {
+                const errorResponse = await response.json();
+                errorMessage = errorResponse.message || errorMessage;
+            } catch (e) {
+                console.warn("Failed to parse error response", e);
+            }
+            throw new Error(errorMessage);
+        }
+
+        // Attempt to parse response body if possible
+        try {
+            return await response.json();
+        } catch (e) {
+            console.warn("Response has no JSON body:", e);
+            return null; // Fallback for no body
+        }
+    } catch (error) {
+        console.error(`API call to ${endpoint} failed:`, error.message);
+        throw error; // Rethrow the error for further handling
+    }
+};
+
+const checkStatus = (response) => {
+    if (response.ok) {
+        const contentLength = response.headers.get("Content-Length");
+        if (contentLength && parseInt(contentLength) > 0) {
+            return response.json(); // Parse JSON for non-empty response
+        }
+        return Promise.resolve(); // Resolve with no value for empty responses
+    }
+
     const error = new Error(response.statusText);
     error.response = response;
     return Promise.reject(error);
-}
+};
+
 
 // const getCsrfToken = () => {
 //     const cookieValue = document.cookie.split('; ').find(row => row.startsWith('XSRF-TOKEN='));
@@ -31,30 +91,40 @@ export const fetchCsrfToken = async () => {
 };
 
 // StudentController API calls
-export const getAllStudents = async () => {
-    const jwtToken = localStorage.getItem('jwtToken');
+// export const getAllStudents = async () => {
+//     const jwtToken = localStorage.getItem('jwtToken');
+//
+//     if (!jwtToken) {
+//         throw new Error('No JWT token found. Please log in.');
+//     }
+//     return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
+//         method: 'GET',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Authorization': `Bearer ${jwtToken}`
+//             // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+//         },
+//         credentials: 'include', // Include cookies for session management
+//     }).then(response => {
+//         if (response.ok) {
+//             console.log(response);
+//             return response; // Parse the response if successful
+//         }
+//         throw new Error('Failed to fetch students');
+//     }).catch(error => {
+//         console.error('Fetch students error:', error);
+//     });
+// }
 
-    if (!jwtToken) {
-        throw new Error('No JWT token found. Please log in.');
+export const getAllStudents = async () => {
+    try {
+        return await fetchApi("/students", { method: "GET" });
+    } catch (error) {
+        console.error("Failed to fetch students:", error.message);
+        throw error; // Propagate error for frontend display or fallback
     }
-    return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${jwtToken}`
-            // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
-        },
-        credentials: 'include', // Include cookies for session management
-    }).then(response => {
-        if (response.ok) {
-            console.log(response);
-            return response; // Parse the response if successful
-        }
-        throw new Error('Failed to fetch students');
-    }).catch(error => {
-        console.error('Fetch students error:', error);
-    });
-}
+};
+
 
 // export const getAllStudents = () =>
 //     fetchCsrfToken().then((csrfToken) =>
@@ -68,16 +138,46 @@ export const getAllStudents = async () => {
 //         })
 //     ).then(checkStatus);
 
-export const addNewStudent = student =>
-    fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
-        headers: {
-            'Content-Type': 'application/json',
-            // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
-        },
-        method: 'POST',
-        credentials: 'include', // Include cookies for session management
-        body: JSON.stringify(student),
-    }).then(checkStatus);
+export const addNewStudent = async (student) => {
+    try {
+        return await fetchApi("/students", {
+            method: "POST",
+            body: JSON.stringify(student),
+        });
+    } catch (error) {
+        console.error("Failed to add new student:", error.message);
+        throw error; // Propagate error for frontend display or fallback
+    }
+};
+
+
+// export const addNewStudent = student=> {
+//     const jwtToken = localStorage.getItem('jwtToken');
+//
+//     if (!jwtToken) {
+//         throw new Error('No JWT token found. Please log in.');
+//     }
+//
+//     return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
+//         headers: {
+//             'Content-Type': 'application/json',
+//             'Authorization': `Bearer ${jwtToken}`
+//             // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
+//         },
+//         method: 'POST',
+//         credentials: 'include', // Include cookies for session management
+//         body: JSON.stringify(student),
+//     }).then(checkStatus);
+//     // }).then(response => {
+//     //     if (response.ok) {
+//     //         console.log(response);
+//     //         return response;
+//     //     }
+//     //     throw new Error('Failed to add student');
+//     // }).catch(error => {
+//     //     console.error('Adding student error:', error);
+//     // });
+// }
 
 export const deleteStudent = studentId =>
     fetch(`/api/v1/students/${studentId}`, {

@@ -11,7 +11,7 @@ import {
     Space
 } from 'antd';
 
-import {addNewStudent} from "../client";
+import {addNewStudent, fetchApi} from "../client";
 import ProgressSpin from "./Spin";
 import {successNotification, errorNotification} from "./Notification";
 
@@ -35,28 +35,90 @@ function AddNewStudent({fetchStudents}, students) {
         setOpen(false);
     };
 
-    const onFinish = student => {
-        setSubmitting(true);
-        console.log(JSON.stringify(student, null, 2))
-        addNewStudent(student)
-            .then(() => {
-                console.log("new student added")
-                onClose();
-                successNotification(
-                    "New Student has been successfully added",
-                    `A new account for ${student.name} has been created on the system`);
-                fetchStudents();
-                setDestroyOnClose(true);
-            }).catch(err => {
-                console.log(err);
-                err.response.json().then(res => {
-                    console.log(res)
-                    errorNotification("Something went wrong...",
-                        `${res.message} [${res.status}] [${res.error}]]`,
-                        "bottomLeft")
-                });
-            }).finally(() => setSubmitting(false));
+    // const onFinish = student => {
+    //     setSubmitting(true);
+    //     console.log(JSON.stringify(student, null, 2))
+    //     addNewStudent(student)
+    //         .then(() => {
+    //             console.log("new student added")
+    //             onClose();
+    //             successNotification(
+    //                 "New Student has been successfully added",
+    //                 `A new account for ${student.name} has been created on the system`);
+    //             fetchStudents();
+    //             setDestroyOnClose(true);
+    //         }).catch(err => {
+    //             console.log(err);
+    //             err.response.json().then(res => {
+    //                 console.log(res)
+    //                 errorNotification("Something went wrong...",
+    //                     `${res.message} [${res.status}] [${res.error}]]`,
+    //                     "bottomLeft")
+    //             });
+    //         }).finally(() => setSubmitting(false));
+    // };
+
+    // const onFinish = (student) => {
+    //     setSubmitting(true);
+    //     console.log(JSON.stringify(student, null, 2));
+    //
+    //     addNewStudent(student)
+    //         .then(() => {
+    //             console.log("New student added");
+    //             onClose();
+    //             successNotification(
+    //                 "New Student has been successfully added",
+    //                 `A new account for ${student.name} has been created on the system`
+    //             );
+    //             fetchStudents(); // Refresh the students list
+    //             setDestroyOnClose(true);
+    //         })
+    //         .catch((err) => {
+    //             if (err.response) {
+    //                 err.response.json().then((res) => {
+    //                     console.log(res);
+    //                     errorNotification(
+    //                         "Something went wrong...",
+    //                         `${res.message} [${res.status}] [${res.error}]`,
+    //                         "bottomLeft"
+    //                     );
+    //                 });
+    //             } else {
+    //                 console.error("Fetch failed:", err);
+    //                 errorNotification("Something went wrong...", err.message);
+    //             }
+    //         })
+    //         .finally(() => setSubmitting(false));
+    // };
+
+    const onFinish = async (student) => {
+        setSubmitting(true); // Indicate form submission state
+        console.log(JSON.stringify(student, null, 2));
+
+        try {
+            await fetchApi("/students", {
+                method: "POST",
+                body: JSON.stringify(student),
+            });
+            console.log("New student added");
+
+            successNotification(
+                "New Student has been successfully added",
+                `A new account for ${student.name} has been created on the system`
+            );
+
+            onClose(); // Close the form or modal
+            fetchStudents(); // Refresh the students list
+            setDestroyOnClose(true); // Reset form behavior
+        } catch (err) {
+            console.error("Add student error:", err);
+            const errorMessage = err.message || "Unexpected error occurred";
+            errorNotification("Something went wrong...", errorMessage, "bottomLeft");
+        } finally {
+            setSubmitting(false); // Stop form submission state
+        }
     };
+
 
     const onFinishFailed = errorInfo => {
         alert(JSON.stringify(errorInfo, null, 2))

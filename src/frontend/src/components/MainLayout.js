@@ -21,7 +21,7 @@ import {
 } from 'antd';
 
 import ProgressSpin from "./Spin";
-import {deleteStudent, getAllStudents} from "../client";
+import {deleteStudent, getAllStudents, fetchApi} from "../client";
 import AddStudent from "./AddNewStudent"
 import {errorNotification, successNotification} from "./Notification";
 
@@ -142,25 +142,43 @@ function MainLayout() {
     const [students, setStudents] = useState([]);
     const [fetching, setFetching] = useState(true);
 
-    const fetchStudents = () =>
-        getAllStudents()
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                setStudents(data);
-            }).catch(err => {
-            if (err.response) {
-                err.response.json().then(res => {
-                    console.log(res);
-                    errorNotification("Something went wrong...",
-                        `${res.message} [${res.status}] [${res.error}]`
-                    );
-                });
-            } else {
-                console.error('Fetch failed:', err); // Catch the undefined error
-                errorNotification("Something went wrong...", err.message);
+    // const fetchStudents = () =>
+    //     getAllStudents()
+    //         .then(res => res.json())
+    //         .then(data => {
+    //             console.log(data);
+    //             setStudents(data);
+    //         }).catch(err => {
+    //         if (err.response) {
+    //             err.response.json().then(res => {
+    //                 console.log(res);
+    //                 errorNotification("Something went wrong...",
+    //                     `${res.message} [${res.status}] [${res.error}]`
+    //                 );
+    //             });
+    //         } else {
+    //             console.error('Fetch failed:', err); // Catch the undefined error
+    //             errorNotification("Something went wrong...", err.message);
+    //         }
+    //     }).finally(() => setFetching(false));
+
+    const fetchStudents = async () => {
+        setFetching(true);
+        try {
+            const data = await fetchApi("/students", { method: "GET" });
+            console.log("Fetching students:", data);
+            if (!data || !Array.isArray(data)) {
+                setStudents([]); // Fallback to an empty array if the response is invalid
+                return;
             }
-        }).finally(() => setFetching(false));
+            setStudents(data);
+        } catch (err) {
+            console.error("Fetch students error:", err);
+            errorNotification("Something went wrong...", err.message || "Unable to fetch students");
+        } finally {
+            setFetching(false);
+        }
+    };
 
     useEffect(() => {
         console.log("component is mounted");
@@ -168,6 +186,7 @@ function MainLayout() {
     }, []);
 
     const renderStudents = () => {
+        console.log(students);
         if (fetching) {
             return <ProgressSpin/>;
         }

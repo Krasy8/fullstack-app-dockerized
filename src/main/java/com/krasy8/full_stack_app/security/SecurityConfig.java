@@ -61,7 +61,8 @@ public class SecurityConfig {
                                 .requestMatchers("/authenticating").permitAll()
                                 .requestMatchers("/api/v1/admin/**").permitAll() //
                                 .requestMatchers("/api/v1/csrf/**").permitAll()
-                                .requestMatchers("/api/v1/students/**").hasRole(Role.MASTER.name())
+                                .requestMatchers("/api/v1/students/**").hasAnyAuthority("ROLE_MASTER")  //.hasRole(Role
+                        // .MASTER.name())
                 )
                 .addFilter(new JwtAuthorizationFilter(authManager(http), jwtUtil))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
