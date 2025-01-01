@@ -3,6 +3,7 @@ package com.krasy8.full_stack_app.security;
 import com.krasy8.full_stack_app.security.jwt.JwtAuthorizationFilter;
 import com.krasy8.full_stack_app.security.jwt.JwtUtil;
 import com.krasy8.full_stack_app.user.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -67,6 +68,18 @@ public class SecurityConfig {
                 .addFilter(new JwtAuthorizationFilter(authManager(http), jwtUtil))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable
+                )
+                .exceptionHandling(exceptions -> exceptions
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Authentication failed\"}");
+                        })
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"error\": \"Access denied\"}");
+                        })
                 );
 
         return http.build();

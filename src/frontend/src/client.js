@@ -34,7 +34,7 @@ export const fetchApi = async (endpoint, options = {}) => {
             // Attempt to parse error response if available
             let errorMessage = `HTTP error ${response.status}`;
             try {
-                const errorResponse = await response.json();
+                const errorResponse = await response.json()
                 errorMessage = errorResponse.message || errorMessage;
             } catch (e) {
                 console.warn("Failed to parse error response", e);
@@ -47,7 +47,7 @@ export const fetchApi = async (endpoint, options = {}) => {
             return await response.json();
         } catch (e) {
             console.warn("Response has no JSON body:", e);
-            return null; // Fallback for no body
+            return response; // Fallback for no body
         }
     } catch (error) {
         console.error(`API call to ${endpoint} failed:`, error.message);
@@ -90,32 +90,6 @@ export const fetchCsrfToken = async () => {
     // return csrfToken.token; // Assuming the server sends the token in JSON format as { "token": "your-csrf-token-value" }
 };
 
-// StudentController API calls
-// export const getAllStudents = async () => {
-//     const jwtToken = localStorage.getItem('jwtToken');
-//
-//     if (!jwtToken) {
-//         throw new Error('No JWT token found. Please log in.');
-//     }
-//     return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
-//         method: 'GET',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'Authorization': `Bearer ${jwtToken}`
-//             // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
-//         },
-//         credentials: 'include', // Include cookies for session management
-//     }).then(response => {
-//         if (response.ok) {
-//             console.log(response);
-//             return response; // Parse the response if successful
-//         }
-//         throw new Error('Failed to fetch students');
-//     }).catch(error => {
-//         console.error('Fetch students error:', error);
-//     });
-// }
-
 export const getAllStudents = async () => {
     try {
         return await fetchApi("/students", { method: "GET" });
@@ -124,19 +98,6 @@ export const getAllStudents = async () => {
         throw error; // Propagate error for frontend display or fallback
     }
 };
-
-
-// export const getAllStudents = () =>
-//     fetchCsrfToken().then((csrfToken) =>
-//         fetch("http://localhost:8080/api/v1/students", {
-//             method: 'GET',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//                 'X-XSRF-TOKEN': csrfToken, // Use the token retrieved from fetchCsrfToken
-//             },
-//             credentials: 'include', // Include cookies for session management
-//         })
-//     ).then(checkStatus);
 
 export const addNewStudent = async (student) => {
     try {
@@ -150,39 +111,16 @@ export const addNewStudent = async (student) => {
     }
 };
 
-
-// export const addNewStudent = student=> {
-//     const jwtToken = localStorage.getItem('jwtToken');
-//
-//     if (!jwtToken) {
-//         throw new Error('No JWT token found. Please log in.');
-//     }
-//
-//     return fetch("http://localhost:8080/api/v1/students", { // Ensure the full backend URL
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'Authorization': `Bearer ${jwtToken}`
-//             // 'X-XSRF-TOKEN': getCsrfToken(), // Include CSRF token
-//         },
-//         method: 'POST',
-//         credentials: 'include', // Include cookies for session management
-//         body: JSON.stringify(student),
-//     }).then(checkStatus);
-//     // }).then(response => {
-//     //     if (response.ok) {
-//     //         console.log(response);
-//     //         return response;
-//     //     }
-//     //     throw new Error('Failed to add student');
-//     // }).catch(error => {
-//     //     console.error('Adding student error:', error);
-//     // });
-// }
-
-export const deleteStudent = studentId =>
-    fetch(`/api/v1/students/${studentId}`, {
-        method: 'DELETE'
-    }).then(checkStatus);
+export const deleteStudent = async (studentId) => {
+    try {
+        return await fetchApi(`/students/${studentId}`, {
+            method: "DELETE",
+            body: JSON.stringify(studentId)
+        });
+    } catch (error) {
+        console.error("Failed to delete student with id: ", studentId)
+    }
+}
 
 // AdminController API calls
 export const loginAdmin = async (credentials) => {

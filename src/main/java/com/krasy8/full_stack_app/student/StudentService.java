@@ -21,7 +21,7 @@ public class StudentService {
         Boolean emailExists = repository.selectEmailExists(student.getEmail());
         if (emailExists) {
             throw new BadRequestException(
-                    "Email " + student.getEmail() + " taken");
+                    "Email: " + student.getEmail() + " taken");
         }
         repository.save(student);
     }
