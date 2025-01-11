@@ -19,26 +19,27 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("api/v1/admin")
-@AllArgsConstructor
+//@AllArgsConstructor
 public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
     @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    JwtUtil jwtUtil;
-
+    public UserController(UserService userService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+        this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
+    }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody User user) {
+    public ResponseEntity<String> register(@RequestBody UserRegistrationRequest regRequest) {
         try
         {
-            userService.registerUser(user);
+            userService.registerUser(regRequest.getUser(), regRequest.getAdminCode());
             return ResponseEntity.ok("Administrator registered successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

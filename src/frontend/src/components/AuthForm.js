@@ -157,6 +157,13 @@ const AuthForm = ({ onLoginSuccess }) => {
                         <Input.Password />
                     </Form.Item>
 
+                    <Form.Item
+                        label="Admin Code (Optional)"
+                        name="adminCode"
+                    >
+                        <Input />
+                    </Form.Item>
+
                     <Form.Item>
                         <Button type="primary" htmlType="submit" block>
                             Register

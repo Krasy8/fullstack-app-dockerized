@@ -162,7 +162,25 @@ export const registerAdmin = async (adminData) => {
             // 'X-XSRF-TOKEN': csrfToken // Include CSRF token
         },
         method: 'POST',
-        credentials: 'include',
+        // credentials: 'include',
         body: JSON.stringify(adminData)
-    }).then(checkStatus);
+    // }).then(checkStatus);
+    }).then(response => {
+        console.log('Response status:', response.status); // Log response status
+        console.log('Response OK:', response.ok); // Log if response is OK
+
+        // Check if the response is OK
+        if (response.ok) {
+            return response.text(); // Response is plain text (JWT token)
+        } else {
+            return response.text().then(text => {
+                console.error('Registration failed:', text); // Log error text from the response
+                throw new Error('Registration failed');
+            });
+        }
+    }).then(async jwtToken => {
+        localStorage.setItem('jwtToken', await jwtToken);
+    }).catch(error => {
+        console.error('Registration error', error);
+    });
 };

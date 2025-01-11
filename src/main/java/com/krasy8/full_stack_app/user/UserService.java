@@ -1,6 +1,9 @@
 package com.krasy8.full_stack_app.user;
 
+import com.krasy8.full_stack_app.master.AdminCode;
+import com.krasy8.full_stack_app.master.AdminCodeService;
 import com.krasy8.full_stack_app.security.Role;
+import com.krasy8.full_stack_app.student.exception.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -9,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -16,16 +20,35 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final AdminCodeService adminCodeService;
 
     @Autowired
-    public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepo, PasswordEncoder passwordEncoder, AdminCodeService adminCodeService) {
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
+        this.adminCodeService = adminCodeService;
     }
 
-    public void registerUser(User user) {
+    public void registerUser(User user, String adminCode) {
+
+        if (userRepo.existsByEmail(user.getEmail())) {
+            throw new BadRequestException(String.format("Email address: %s already in use", user.getEmail()));
+        }
+
+        if (adminCode != null) {
+            Optional<AdminCode> code = adminCodeService.validateAdminCode(adminCode);
+            if (code.isPresent()) {
+                user.setRole(Role.ADMIN);
+                adminCodeService.assignAdminCodeToUser(code.get(), user.getId());
+            } else {
+                throw new BadRequestException(String.format("Invalid admin code: %s", adminCode));
+            }
+        } else {
+            user.setRole(Role.STUDENT);
+        }
+
         user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash password
-        user.setRole(Role.STUDENT);
+        //user.setRole(Role.STUDENT);
         user.setAccountNonExpired(true);
         user.setAccountNonLocked(true);
         user.setCredentialsNonExpired(true);
