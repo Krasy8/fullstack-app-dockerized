@@ -8,7 +8,8 @@ import {useNavigate} from "react-router-dom"; // Import custom styles
 const { TabPane } = Tabs;
 
 const AuthForm = ({ onLoginSuccess }) => {
-    const [form] = Form.useForm();
+    const [loginForm] = Form.useForm();
+    const [registerForm] = Form.useForm();
     const navigate = useNavigate();
 
     const onLoginFinish = async (values) => {
@@ -31,9 +32,9 @@ const AuthForm = ({ onLoginSuccess }) => {
             await registerAdmin(values);
             message.success('Registration successful! Redirecting...');
             setTimeout(() => {
-                navigate('/'); // Redirect to the main page
+                navigate('/authorized'); // Redirect to the main page
             }, 1000);
-            form.resetFields();
+            registerForm.resetFields();
         } catch (error) {
             console.log('Registration failed:', error);
             message.error('Registration failed. Please try again.');
@@ -56,7 +57,7 @@ const AuthForm = ({ onLoginSuccess }) => {
             label: 'Login',
             children: (
                 <Form
-                    form={form}
+                    form={loginForm}
                     name="loginForm"
                     layout="vertical"
                     onFinish={onLoginFinish}
@@ -90,7 +91,7 @@ const AuthForm = ({ onLoginSuccess }) => {
             label: 'Register',
             children: (
                 <Form
-                    form={form}
+                    form={registerForm}
                     name="registerForm"
                     layout="vertical"
                     onFinish={onRegisterFinish}
