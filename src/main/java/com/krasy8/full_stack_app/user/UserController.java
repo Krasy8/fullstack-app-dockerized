@@ -36,10 +36,10 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserRegistrationRequest regRequest) {
+    public ResponseEntity<String> register(@RequestBody User user) {
         try
         {
-            userService.registerUser(regRequest.getUser(), regRequest.getAdminCode());
+            userService.registerUser(user);
             return ResponseEntity.ok("Administrator registered successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

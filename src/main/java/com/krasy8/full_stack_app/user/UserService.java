@@ -29,17 +29,20 @@ public class UserService implements UserDetailsService {
         this.adminCodeService = adminCodeService;
     }
 
-    public void registerUser(User user, String adminCode) {
+    public void registerUser(User user) {
 
         if (userRepo.existsByEmail(user.getEmail())) {
             throw new BadRequestException(String.format("Email address: %s already in use", user.getEmail()));
         }
 
+        final String adminCode = user.getAdminCode();
+
         if (adminCode != null) {
             Optional<AdminCode> code = adminCodeService.validateAdminCode(adminCode);
             if (code.isPresent()) {
                 user.setRole(Role.ADMIN);
-                adminCodeService.assignAdminCodeToUser(code.get(), user.getId());
+                final Long userId = getNextUserId();
+                adminCodeService.assignAdminCodeToUser(code.get(), userId);
             } else {
                 throw new BadRequestException(String.format("Invalid admin code: %s", adminCode));
             }
@@ -95,5 +98,9 @@ public class UserService implements UserDetailsService {
         if (!user.isEnabled()) {
             throw new UsernameNotFoundException(String.format("Username %s is disabled", user.getUsername()));
         }
+    }
+
+    public Long getNextUserId() {
+        return userRepo.getNextUserId();
     }
 }

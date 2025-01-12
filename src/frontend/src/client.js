@@ -10,8 +10,6 @@ import fetch from 'unfetch';
 //     return Promise.reject(error);
 // }
 
-const BASE_URL = "http://localhost:8080/api/vi";
-
 export const fetchApi = async (endpoint, options = {}) => {
     const baseUrl = "http://localhost:8080/api/v1";
     const jwtToken = localStorage.getItem("jwtToken");

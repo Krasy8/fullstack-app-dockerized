@@ -61,6 +61,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Column
+    private String adminCode;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getGrantedAuthority();

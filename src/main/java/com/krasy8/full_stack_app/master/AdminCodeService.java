@@ -14,12 +14,10 @@ import java.util.UUID;
 public class AdminCodeService {
 
     private final AdminCodeRepository adminCodeRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public AdminCodeService(AdminCodeRepository adminCodeRepository, PasswordEncoder passwordEncoder) {
+    public AdminCodeService(AdminCodeRepository adminCodeRepository) {
         this.adminCodeRepository = adminCodeRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public List<AdminCode> getAllAdminCodes() {
@@ -28,8 +26,8 @@ public class AdminCodeService {
 
     // Validate an admin code
     public Optional<AdminCode> validateAdminCode(String code) {
-        String hashedCode = passwordEncoder.encode(code);
-        return adminCodeRepository.findByCodeAndExpirationDateAfter(hashedCode, LocalDateTime.now());
+//        String hashedCode = passwordEncoder.encode(code);
+        return adminCodeRepository.findByCodeAndExpirationDateAfter(code, LocalDateTime.now());
     }
 
     // Assign an admin code to a user

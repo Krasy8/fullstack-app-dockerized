@@ -1,9 +1,10 @@
 import React, {useState, useEffect} from 'react';
+import {jwtDecode} from "jwt-decode";
 import {
-    DesktopOutlined,
-    FileOutlined,
-    PieChartOutlined,
+    BarcodeOutlined,
+    FileOutlined, PlusOutlined,
     TeamOutlined,
+    UsergroupAddOutlined,
     UserOutlined,
 } from '@ant-design/icons';
 
@@ -17,7 +18,7 @@ import {
     Tag,
     Flex,
     Avatar,
-    Radio, Popconfirm
+    Radio, Popconfirm, Button, Empty
 } from 'antd';
 
 import ProgressSpin from "./Spin";
@@ -25,8 +26,10 @@ import {deleteStudent, getAllStudents, fetchApi} from "../client";
 import AddStudent from "./AddNewStudent"
 import {errorNotification, successNotification} from "./Notification";
 
-
-const {Header, Content, Footer, Sider} = Layout;
+const { Header,
+    Content,
+    Footer,
+    Sider} = Layout;
 
 function getItem(label, key, icon, children) {
     return {
@@ -36,18 +39,6 @@ function getItem(label, key, icon, children) {
         label,
     };
 }
-
-const items = [
-    getItem('Option 1', '1', <PieChartOutlined/>),
-    getItem('Option 2', '2', <DesktopOutlined/>),
-    getItem('User', 'sub1', <UserOutlined/>, [
-        getItem('Tom', '3'),
-        getItem('Bill', '4'),
-        getItem('Alex', '5'),
-    ]),
-    getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
-    getItem('Files', '9', <FileOutlined/>),
-];
 
 const TheAvatar = ({name}) => {
     let trim = name.trim();
@@ -87,7 +78,7 @@ const removeStudent = (studentId, callback) => {
     })
 }
 
-const columns = fetchStudents => [
+const studentColumns = fetchStudents => [
     {
         title: '',
         dataIndex: 'avatar',
@@ -132,35 +123,75 @@ const columns = fetchStudents => [
     }
 ];
 
+function deleteAdminCode(id, fetchAdminCodes) {
+    return undefined;
+}
+
+const adminCodesColumns = fetchAdminCodes => [
+    {
+        title: 'Id',
+        dataIndex: 'id',
+        key: 'id',
+    },
+    {
+        title: 'Code',
+        dataIndex: 'code',
+        key: 'code',
+    },
+    {
+        title: 'Expiration Date',
+        dataIndex: 'expirationDate',
+        key: 'expirationDate',
+    },
+    {
+        title: 'User Id',
+        dataIndex: 'userId',
+        key: 'userId',
+    },
+    {
+        title: 'Used At',
+        dataIndex: 'usedAt',
+        key: 'usedAt',
+    },
+    {
+        title: 'Actions',
+        key: 'actions',
+        render: (text, adminCode) =>
+            <Radio.Group>
+                <Popconfirm
+                    placement='topRight'
+                    title={`Are you sure to delete ${adminCode.code}`}
+                    onConfirm={() => deleteAdminCode(adminCode.id, fetchAdminCodes)}
+                    okText='Yes'
+                    cancelText='No'>
+                    <Radio.Button value="small">Delete</Radio.Button>
+                </Popconfirm>
+            </Radio.Group>
+    }
+];
 
 function MainLayout() {
     const [collapsed, setCollapsed] = useState(false);
+    const [activeTab, setActiveTab] = useState('1'); // Track active tab
+    const [userAuthorities, setUserAuthorities] = useState([]);
     const {
         token: {colorBgContainer, borderRadiusLG},
     } = theme.useToken();
 
     const [students, setStudents] = useState([]);
+    const [adminCodes, setAdminCodes] = useState([]);
     const [fetching, setFetching] = useState(true);
 
-    // const fetchStudents = () =>
-    //     getAllStudents()
-    //         .then(res => res.json())
-    //         .then(data => {
-    //             console.log(data);
-    //             setStudents(data);
-    //         }).catch(err => {
-    //         if (err.response) {
-    //             err.response.json().then(res => {
-    //                 console.log(res);
-    //                 errorNotification("Something went wrong...",
-    //                     `${res.message} [${res.status}] [${res.error}]`
-    //                 );
-    //             });
-    //         } else {
-    //             console.error('Fetch failed:', err); // Catch the undefined error
-    //             errorNotification("Something went wrong...", err.message);
-    //         }
-    //     }).finally(() => setFetching(false));
+    useEffect(() => {
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (jwtToken) {
+            const decodedJwt = jwtDecode(jwtToken);
+            console.log("user authorities from jwt: ", decodedJwt);
+            const authorities = decodedJwt.authorities;
+            setUserAuthorities(authorities || []);
+            console.log("user authorities after setting: ", userAuthorities);
+        }
+    }, []);
 
     const fetchStudents = async () => {
         setFetching(true);
@@ -168,7 +199,7 @@ function MainLayout() {
             const data = await fetchApi("/students", { method: "GET" });
             console.log("Fetching students:", data);
             if (!data || !Array.isArray(data)) {
-                setStudents([]); // Fallback to an empty array if the response is invalid
+                setStudents([]); // Fallback to an emptyAdminCodes array if the response is invalid
                 return;
             }
             setStudents(data);
@@ -180,9 +211,31 @@ function MainLayout() {
         }
     };
 
+    const fetchAdminCodes = async () => {
+        setFetching(true);
+        try {
+            const data = await fetchApi("/master/admin-codes", { method: "GET" });
+            console.log("Fetching admin codes:", data);
+            if (!data || !Array.isArray(data)) {
+                setAdminCodes([]); // Fallback to an emptyAdminCodes array if the response is invalid
+                return;
+            }
+            setAdminCodes(data);
+        } catch (err) {
+            console.error("Fetch admin codes error:", err);
+            errorNotification("Something went wrong...", err.message || "Unable to fetch admin codes");
+        } finally {
+            setFetching(false);
+        }
+    };
+
     useEffect(() => {
         console.log("component is mounted");
         fetchStudents().then(r => console.log(r));
+
+        if (userAuthorities.includes('ROLE_MASTER')) {
+            fetchAdminCodes().then(r => console.log(r));
+        }
     }, []);
 
     const renderStudents = () => {
@@ -193,7 +246,7 @@ function MainLayout() {
 
         return <Table
             dataSource={students}
-            columns={columns(fetchStudents)}
+            columns={studentColumns(fetchStudents)}
             bordered
             title={() =>
                 <>
@@ -211,7 +264,109 @@ function MainLayout() {
             rowKey={(student) => student.id}
         />;
     }
+
+    const emptyAdminCodes = (adminCodes) => {
+        if (adminCodes.length <=0){
+            return <Empty/>
+        }
+    }
+
+    const handleAdminCodesTabClick = async () => {
+        setActiveTab('2');
+        await fetchAdminCodes();
+    }
+
+    const generateNewAdminCode = async () => {
+        try {
+            await fetchApi("/master/generate-admin-code", {
+                method: "POST",
+            });
+            successNotification(
+                "New Admin Code has been successfully generated",
+                `A new Admin Code has been generated`
+            );
+            await fetchAdminCodes(); // Refresh the students list
+        } catch (err) {
+            console.error("Add Admin Code error:", err);
+            const errorMessage = err.message || "Unexpected error occurred";
+            errorNotification("Something went wrong...", errorMessage, "bottomLeft");
+        }
+    };
+
+    const renderAdminCodes = () => {
+        console.log(adminCodes);
+        if (fetching) {
+            return <ProgressSpin/>;
+        }
+
+        return <Table
+            dataSource={adminCodes}
+            columns={adminCodesColumns(fetchAdminCodes)}
+            bordered
+            title={() =>
+                <>
+                    <Button type="primary"
+                            onClick={generateNewAdminCode}
+                            icon={<PlusOutlined/>}
+                            style={{marginRight: '10px'}}>
+                        New Admin Code
+                    </Button>
+                    <br/><br/>
+                    <>
+                        {emptyAdminCodes(adminCodes)}
+                    </>
+                    <Flex>
+                        <Tag>Number of Admin Codes</Tag>
+                        <Badge count={adminCodes.length} showZero color="#52c41a"/>
+                    </Flex>
+                </>
+            }
+            pagination={{
+                pageSize: 50,
+            }}
+            scroll={{y: 500}}
+            rowKey={(adminCode) => adminCode.id}
+        />;
+    }
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case '1':
+                return renderStudents();
+            case '2':
+                return renderAdminCodes();
+            default:
+                return <div>Select a tab to view content.</div>;
+        }
+    }
+
+    const breadCrumbTitle = () => {
+        switch (activeTab) {
+            case '1':
+                return 'Students';
+            case '2':
+                return 'Admin Codes';
+            default:
+                return 'User';
+        }
+    }
+
+    const isMasterUser = userAuthorities.includes('ROLE_MASTER');
+
+    const menuItems = [
+        getItem('Students', '1', <UsergroupAddOutlined/>),
+        isMasterUser && getItem('Admin Codes', '2', <BarcodeOutlined/>),
+        getItem('User', 'sub1', <UserOutlined/>, [
+            getItem('Tom', '3'),
+            getItem('Bill', '4'),
+            getItem('Alex', '5'),
+        ]),
+        getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+        getItem('Files', '9', <FileOutlined/>),
+    ].filter(Boolean);
+
     console.log('MainLayout rendered')
+
     return (
         <Layout
             style={{
@@ -220,7 +375,13 @@ function MainLayout() {
         >
             <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
                 <div className="demo-logo-vertical"/>
-                <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items}/>
+                <Menu
+                    theme="dark"
+                    defaultSelectedKeys={['1']}
+                    mode="inline"
+                    items={menuItems}
+                    onClick={handleAdminCodesTabClick} // update active tab
+                />
             </Sider>
             <Layout>
                 <Header
@@ -240,10 +401,7 @@ function MainLayout() {
                         }}
                         items={[
                             {
-                                title: 'User',
-                            },
-                            {
-                                title: 'Students',
+                                title: breadCrumbTitle(),
                             },
                             // {
                             //     title: <a href="">Application Center</a>,
@@ -264,7 +422,7 @@ function MainLayout() {
                             borderRadius: borderRadiusLG,
                         }}
                     >
-                        {renderStudents()}
+                        {renderContent()}
                     </div>
                 </Content>
                 <Footer
