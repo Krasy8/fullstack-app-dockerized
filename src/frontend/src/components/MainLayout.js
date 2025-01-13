@@ -170,7 +170,7 @@ const adminCodesColumns = fetchAdminCodes => [
     }
 ];
 
-function MainLayout() {
+function MainLayout( {handleLogout} ) {
     const [collapsed, setCollapsed] = useState(false);
     const [activeTab, setActiveTab] = useState('1'); // Track active tab
     const [userAuthorities, setUserAuthorities] = useState([]);
@@ -389,7 +389,17 @@ function MainLayout() {
                         padding: 0,
                         background: colorBgContainer,
                     }}
-                />
+
+                >
+                    <Button
+                        type="primary"
+                        danger
+                        onClick={handleLogout}
+                        style={{ float: 'right', margin: '16px' }}
+                    >
+                        Log Out
+                    </Button>
+                </Header>
                 <Content
                     style={{
                         margin: '0 16px',
