@@ -1,4 +1,5 @@
 import React, {useState, useEffect} from 'react';
+import '../css/customCSS.css';
 import {jwtDecode} from "jwt-decode";
 import {
     BarcodeOutlined,
@@ -6,6 +7,7 @@ import {
     TeamOutlined,
     UsergroupAddOutlined,
     UserOutlined,
+    LogoutOutlined
 } from '@ant-design/icons';
 
 import {
@@ -142,6 +144,16 @@ const adminCodesColumns = fetchAdminCodes => [
         title: 'Expiration Date',
         dataIndex: 'expirationDate',
         key: 'expirationDate',
+        render: (expirationDate, record) => {
+            const isExpired = new Date(expirationDate) < new Date();
+            const isUsed = !!record.usedAt;
+            const cellClass = (isExpired && !isUsed) ? 'expired-unused' : '';
+            return (
+                <div className={cellClass}>
+                    {expirationDate}
+                </div>
+            )
+        }
     },
     {
         title: 'User Id',
@@ -260,7 +272,7 @@ function MainLayout( {handleLogout} ) {
             pagination={{
                 pageSize: 50,
             }}
-            scroll={{y: 500}}
+            scroll={{y: 1500}}
             rowKey={(student) => student.id}
         />;
     }
@@ -271,9 +283,10 @@ function MainLayout( {handleLogout} ) {
         }
     }
 
-    const handleAdminCodesTabClick = async () => {
-        setActiveTab('2');
-        await fetchAdminCodes();
+    const handleAdminCodesTabClick = async ({ key }) => {
+        setActiveTab(key);
+        if (key === '2')
+            await fetchAdminCodes();
     }
 
     const generateNewAdminCode = async () => {
@@ -324,7 +337,7 @@ function MainLayout( {handleLogout} ) {
             pagination={{
                 pageSize: 50,
             }}
-            scroll={{y: 500}}
+            scroll={{y: 1500}}
             rowKey={(adminCode) => adminCode.id}
         />;
     }
@@ -394,6 +407,8 @@ function MainLayout( {handleLogout} ) {
                     <Button
                         type="primary"
                         danger
+                        shape="round"
+                        icon={<LogoutOutlined/>}
                         onClick={handleLogout}
                         style={{ float: 'right', margin: '16px' }}
                     >
