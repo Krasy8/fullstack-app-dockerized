@@ -85,17 +85,32 @@ const studentColumns = fetchStudents => [
         title: '',
         dataIndex: 'avatar',
         key: 'avatar',
-        render: (text, student) => <TheAvatar name={student.name}/>
+        render: (text, student) => <TheAvatar name={student.username}/>
     },
     {
-        title: 'Id',
-        dataIndex: 'id',
-        key: 'id',
+        title: 'Student Id',
+        dataIndex: 'studentId',
+        key: 'studentId',
     },
     {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
+        title: 'User Id',
+        dataIndex: 'userId',
+        key: 'userId',
+    },
+    {
+        title: 'First Name',
+        dataIndex: 'firstName',
+        key: 'firstName',
+    },
+    {
+        title: 'Last Name',
+        dataIndex: 'lastName',
+        key: 'lastName',
+    },
+    {
+        title: 'Username',
+        dataIndex: 'username',
+        key: 'username',
     },
     {
         title: 'Email',

@@ -165,8 +165,8 @@ function AddNewStudent({fetchStudents}, students) {
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item
-                                name="name"
-                                label="Name"
+                                name="username"
+                                label="username"
                                 rules={[{
                                     required: true, message: 'Please enter user name',
                                 },]}

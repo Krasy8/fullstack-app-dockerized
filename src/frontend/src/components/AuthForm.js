@@ -1,5 +1,5 @@
 import React from 'react';
-import {Tabs, Form, Input, Button, Space, message} from 'antd';
+import {Tabs, Form, Input, Button, Space, message, Select} from 'antd';
 import { GoogleOutlined, AppleOutlined } from '@ant-design/icons';
 import './AuthForm.css';
 import {loginAdmin, registerAdmin} from "../client";
@@ -11,6 +11,8 @@ const AuthForm = ({ onLoginSuccess }) => {
     const [loginForm] = Form.useForm();
     const [registerForm] = Form.useForm();
     const navigate = useNavigate();
+
+    const {Option} = Select;
 
     const onLoginFinish = async (values) => {
         console.log('Login values:', values);
@@ -118,6 +120,20 @@ const AuthForm = ({ onLoginSuccess }) => {
                         rules={[{ required: true, message: 'Please input your username!' }]}
                     >
                         <Input />
+                    </Form.Item>
+
+                    <Form.Item
+                        name="gender"
+                        label="Gender"
+                        rules={[{
+                            required: true, message: 'Please select your gender',
+                        },]}
+                    >
+                        <Select placeholder="Please select an owner">
+                            <Option value="FEMALE">FEMALE</Option>
+                            <Option value="MALE">MALE</Option>
+                            <Option value="OTHER">OTHER</Option>
+                        </Select>
                     </Form.Item>
 
                     <Form.Item
