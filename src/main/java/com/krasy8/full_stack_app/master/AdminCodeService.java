@@ -1,5 +1,6 @@
 package com.krasy8.full_stack_app.master;
 
+import com.krasy8.full_stack_app.student.exception.AdminCodeNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -52,5 +53,12 @@ public class AdminCodeService {
         adminCode.setExpirationDate(LocalDateTime.now().plusDays(7));
         adminCodeRepository.save(adminCode);
         return code;
+    }
+
+    public void deleteAdminCode(Long id) {
+        if (!adminCodeRepository.existsById(id)) {
+            throw new AdminCodeNotFoundException("Admin code id: " + id + " not found");
+        }
+        adminCodeRepository.deleteById(id);
     }
 }

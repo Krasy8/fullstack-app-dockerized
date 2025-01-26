@@ -24,7 +24,7 @@ import {
 } from 'antd';
 
 import ProgressSpin from "./Spin";
-import {deleteStudent, getAllStudents, fetchApi} from "../client";
+import {deleteStudent, getAllStudents, getAllAdminCodes, generateAdminCode, deleteAdminCode} from "../client";
 import AddStudent from "./AddNewStudent"
 import {errorNotification, successNotification} from "./Notification";
 
@@ -96,16 +96,19 @@ const studentColumns = fetchStudents => [
         title: 'User Id',
         dataIndex: 'userId',
         key: 'userId',
+        render: (text, student) => student.userId ?? "A",
     },
     {
         title: 'First Name',
         dataIndex: 'firstName',
         key: 'firstName',
+        render: (text, student) => student.firstName ?? "B",
     },
     {
         title: 'Last Name',
         dataIndex: 'lastName',
         key: 'lastName',
+        render: (text, student) => student.lastName ?? "C"
     },
     {
         title: 'Username',
@@ -129,19 +132,31 @@ const studentColumns = fetchStudents => [
             <Radio.Group>
                 <Popconfirm
                     placement='topRight'
-                    title={`Are you sure to delete ${student.name}`}
-                    onConfirm={() => removeStudent(student.id, fetchStudents)}
+                    title={`Are you sure to delete ${student.username}`}
+                    onConfirm={() => removeStudent(student.studentId, fetchStudents)}
                     okText='Yes'
                     cancelText='No'>
-                    <Radio.Button value="small">Delete</Radio.Button>
+                    <Radio.Button key={`delete-${student.id}`} value="small">Delete</Radio.Button>
                 </Popconfirm>
-                <Radio.Button value="small">Edit</Radio.Button>
+                <Radio.Button key={`edit-${student.id}`} value="small">Edit</Radio.Button>
             </Radio.Group>
     }
 ];
 
-function deleteAdminCode(id, fetchAdminCodes) {
-    return undefined;
+const removeAdminCode = (id, callback) => {
+    deleteAdminCode(id).then(() => {
+        successNotification("Admin Code deleted", `Admin Code with id: ${id} has been deleted from the system`);
+        callback();
+    }).catch(err => {
+        console.log(err.response)
+        err.response.json().then(res => {
+            console.log(res)
+            errorNotification("Something went wrong...",
+                `${res.message} [${res.status}] [${res.error}]]`,
+                "bottomLeft"
+            )
+        });
+    })
 }
 
 const adminCodesColumns = fetchAdminCodes => [
@@ -174,11 +189,13 @@ const adminCodesColumns = fetchAdminCodes => [
         title: 'User Id',
         dataIndex: 'userId',
         key: 'userId',
+        render: (text, adminCode) => adminCode.userId ?? "D"
     },
     {
         title: 'Used At',
         dataIndex: 'usedAt',
         key: 'usedAt',
+        render: (text, adminCode) => adminCode.usedAt ?? "E"
     },
     {
         title: 'Actions',
@@ -188,10 +205,10 @@ const adminCodesColumns = fetchAdminCodes => [
                 <Popconfirm
                     placement='topRight'
                     title={`Are you sure to delete ${adminCode.code}`}
-                    onConfirm={() => deleteAdminCode(adminCode.id, fetchAdminCodes)}
+                    onConfirm={() => removeAdminCode(adminCode.id, fetchAdminCodes)}
                     okText='Yes'
                     cancelText='No'>
-                    <Radio.Button value="small">Delete</Radio.Button>
+                    <Radio.Button key={`delete-${adminCode.id}`} value="small">Delete</Radio.Button>
                 </Popconfirm>
             </Radio.Group>
     }
@@ -223,7 +240,8 @@ function MainLayout( {handleLogout} ) {
     const fetchStudents = async () => {
         setFetching(true);
         try {
-            const data = await fetchApi("/students", { method: "GET" });
+            // const data = await fetchApi("/students", { method: "GET" });
+            const data = await getAllStudents();
             console.log("Fetching students:", data);
             if (!data || !Array.isArray(data)) {
                 setStudents([]); // Fallback to an emptyAdminCodes array if the response is invalid
@@ -241,7 +259,8 @@ function MainLayout( {handleLogout} ) {
     const fetchAdminCodes = async () => {
         setFetching(true);
         try {
-            const data = await fetchApi("/master/admin-codes", { method: "GET" });
+            // const data = await fetchApi("/master/admin-codes", { method: "GET" });
+            const data = await getAllAdminCodes();
             console.log("Fetching admin codes:", data);
             if (!data || !Array.isArray(data)) {
                 setAdminCodes([]); // Fallback to an emptyAdminCodes array if the response is invalid
@@ -306,9 +325,10 @@ function MainLayout( {handleLogout} ) {
 
     const generateNewAdminCode = async () => {
         try {
-            await fetchApi("/master/generate-admin-code", {
-                method: "POST",
-            });
+            // await fetchApi("/master/generate-admin-code", {
+            //     method: "POST",
+            // });
+            await generateAdminCode();
             successNotification(
                 "New Admin Code has been successfully generated",
                 `A new Admin Code has been generated`

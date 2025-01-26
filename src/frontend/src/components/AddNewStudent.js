@@ -11,7 +11,7 @@ import {
     Space
 } from 'antd';
 
-import {addNewStudent, fetchApi} from "../client";
+import {addNewStudent} from "../client";
 import ProgressSpin from "./Spin";
 import {successNotification, errorNotification} from "./Notification";
 
@@ -22,7 +22,7 @@ const returnSpin = () => {
 }
 
 
-function AddNewStudent({fetchStudents}, students) {
+function AddNewStudent({fetchStudents, students}) {
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [destroyOnClose, setDestroyOnClose] = useState(false);
@@ -35,76 +35,21 @@ function AddNewStudent({fetchStudents}, students) {
         setOpen(false);
     };
 
-    // const onFinish = student => {
-    //     setSubmitting(true);
-    //     console.log(JSON.stringify(student, null, 2))
-    //     addNewStudent(student)
-    //         .then(() => {
-    //             console.log("new student added")
-    //             onClose();
-    //             successNotification(
-    //                 "New Student has been successfully added",
-    //                 `A new account for ${student.name} has been created on the system`);
-    //             fetchStudents();
-    //             setDestroyOnClose(true);
-    //         }).catch(err => {
-    //             console.log(err);
-    //             err.response.json().then(res => {
-    //                 console.log(res)
-    //                 errorNotification("Something went wrong...",
-    //                     `${res.message} [${res.status}] [${res.error}]]`,
-    //                     "bottomLeft")
-    //             });
-    //         }).finally(() => setSubmitting(false));
-    // };
-
-    // const onFinish = (student) => {
-    //     setSubmitting(true);
-    //     console.log(JSON.stringify(student, null, 2));
-    //
-    //     addNewStudent(student)
-    //         .then(() => {
-    //             console.log("New student added");
-    //             onClose();
-    //             successNotification(
-    //                 "New Student has been successfully added",
-    //                 `A new account for ${student.name} has been created on the system`
-    //             );
-    //             fetchStudents(); // Refresh the students list
-    //             setDestroyOnClose(true);
-    //         })
-    //         .catch((err) => {
-    //             if (err.response) {
-    //                 err.response.json().then((res) => {
-    //                     console.log(res);
-    //                     errorNotification(
-    //                         "Something went wrong...",
-    //                         `${res.message} [${res.status}] [${res.error}]`,
-    //                         "bottomLeft"
-    //                     );
-    //                 });
-    //             } else {
-    //                 console.error("Fetch failed:", err);
-    //                 errorNotification("Something went wrong...", err.message);
-    //             }
-    //         })
-    //         .finally(() => setSubmitting(false));
-    // };
-
     const onFinish = async (student) => {
         setSubmitting(true); // Indicate form submission state
         console.log(JSON.stringify(student, null, 2));
 
         try {
-            await fetchApi("/students", {
-                method: "POST",
-                body: JSON.stringify(student),
-            });
+            // await fetchApi("/students", {
+            //     method: "POST",
+            //     body: JSON.stringify(student),
+            // });
+            await addNewStudent(student)
             console.log("New student added");
 
             successNotification(
                 "New Student has been successfully added",
-                `A new account for ${student.name} has been created on the system`
+                `A new account for ${student.username} has been created on the system`
             );
 
             onClose(); // Close the form or modal
@@ -119,7 +64,6 @@ function AddNewStudent({fetchStudents}, students) {
         }
     };
 
-
     const onFinishFailed = errorInfo => {
         alert(JSON.stringify(errorInfo, null, 2))
     }
@@ -128,6 +72,7 @@ function AddNewStudent({fetchStudents}, students) {
         if (students.length <=0){
             return <Empty/>
         }
+        return null;
     }
 
     return (
