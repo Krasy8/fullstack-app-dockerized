@@ -40,10 +40,6 @@ function AddNewStudent({fetchStudents, students}) {
         console.log(JSON.stringify(student, null, 2));
 
         try {
-            // await fetchApi("/students", {
-            //     method: "POST",
-            //     body: JSON.stringify(student),
-            // });
             await addNewStudent(student)
             console.log("New student added");
 

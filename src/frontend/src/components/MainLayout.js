@@ -96,19 +96,19 @@ const studentColumns = fetchStudents => [
         title: 'User Id',
         dataIndex: 'userId',
         key: 'userId',
-        render: (text, student) => student.userId ?? "A",
+        render: (text, student) => student.userId ?? "N/A",
     },
     {
         title: 'First Name',
         dataIndex: 'firstName',
         key: 'firstName',
-        render: (text, student) => student.firstName ?? "B",
+        render: (text, student) => student.firstName ?? "N/A",
     },
     {
         title: 'Last Name',
         dataIndex: 'lastName',
         key: 'lastName',
-        render: (text, student) => student.lastName ?? "C"
+        render: (text, student) => student.lastName ?? "N/A"
     },
     {
         title: 'Username',
@@ -189,13 +189,13 @@ const adminCodesColumns = fetchAdminCodes => [
         title: 'User Id',
         dataIndex: 'userId',
         key: 'userId',
-        render: (text, adminCode) => adminCode.userId ?? "D"
+        render: (text, adminCode) => adminCode.userId ?? "N/A"
     },
     {
         title: 'Used At',
         dataIndex: 'usedAt',
         key: 'usedAt',
-        render: (text, adminCode) => adminCode.usedAt ?? "E"
+        render: (text, adminCode) => adminCode.usedAt ?? "N/A"
     },
     {
         title: 'Actions',
@@ -240,7 +240,6 @@ function MainLayout( {handleLogout} ) {
     const fetchStudents = async () => {
         setFetching(true);
         try {
-            // const data = await fetchApi("/students", { method: "GET" });
             const data = await getAllStudents();
             console.log("Fetching students:", data);
             if (!data || !Array.isArray(data)) {
@@ -259,7 +258,6 @@ function MainLayout( {handleLogout} ) {
     const fetchAdminCodes = async () => {
         setFetching(true);
         try {
-            // const data = await fetchApi("/master/admin-codes", { method: "GET" });
             const data = await getAllAdminCodes();
             console.log("Fetching admin codes:", data);
             if (!data || !Array.isArray(data)) {
@@ -325,9 +323,6 @@ function MainLayout( {handleLogout} ) {
 
     const generateNewAdminCode = async () => {
         try {
-            // await fetchApi("/master/generate-admin-code", {
-            //     method: "POST",
-            // });
             await generateAdminCode();
             successNotification(
                 "New Admin Code has been successfully generated",
