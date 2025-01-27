@@ -42,6 +42,8 @@ function getItem(label, key, icon, children) {
     };
 }
 
+// Students //
+
 const TheAvatar = ({name}) => {
     let trim = name.trim();
     if (trim.length === 0) {
@@ -143,6 +145,8 @@ const studentColumns = fetchStudents => [
     }
 ];
 
+// Admin Codes //
+
 const removeAdminCode = (id, callback) => {
     deleteAdminCode(id).then(() => {
         successNotification("Admin Code deleted", `Admin Code with id: ${id} has been deleted from the system`);
@@ -215,6 +219,9 @@ const adminCodesColumns = fetchAdminCodes => [
 ];
 
 function MainLayout( {handleLogout} ) {
+
+    // Main Layout //
+
     const [collapsed, setCollapsed] = useState(false);
     const [activeTab, setActiveTab] = useState('1'); // Track active tab
     const [userAuthorities, setUserAuthorities] = useState([]);
@@ -226,6 +233,42 @@ function MainLayout( {handleLogout} ) {
     const [adminCodes, setAdminCodes] = useState([]);
     const [fetching, setFetching] = useState(true);
 
+    const isMasterUser = userAuthorities.includes('ROLE_MASTER');
+
+    const menuItems = [
+        getItem('Students', '1', <UsergroupAddOutlined/>),
+        isMasterUser && getItem('Admin Codes', '2', <BarcodeOutlined/>),
+        getItem('User', 'sub1', <UserOutlined/>, [
+            getItem('Tom', '3'),
+            getItem('Bill', '4'),
+            getItem('Alex', '5'),
+        ]),
+        getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+        getItem('Files', '9', <FileOutlined/>),
+    ].filter(Boolean);
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case '1':
+                return renderStudents();
+            case '2':
+                return renderAdminCodes();
+            default:
+                return <div>Select a tab to view content.</div>;
+        }
+    }
+
+    const breadCrumbTitle = () => {
+        switch (activeTab) {
+            case '1':
+                return 'Students';
+            case '2':
+                return 'Admin Codes';
+            default:
+                return 'User';
+        }
+    }
+
     useEffect(() => {
         const jwtToken = localStorage.getItem('jwtToken');
         if (jwtToken) {
@@ -236,6 +279,19 @@ function MainLayout( {handleLogout} ) {
             console.log("user authorities after setting: ", userAuthorities);
         }
     }, []);
+
+    useEffect(() => {
+        console.log("component is mounted");
+        fetchStudents().then(r => console.log(r));
+
+        if (userAuthorities.includes('ROLE_MASTER')) {
+            fetchAdminCodes().then(r => console.log(r));
+        }
+    }, []);
+
+    console.log('MainLayout rendered')
+
+    // Students //
 
     const fetchStudents = async () => {
         setFetching(true);
@@ -254,33 +310,6 @@ function MainLayout( {handleLogout} ) {
             setFetching(false);
         }
     };
-
-    const fetchAdminCodes = async () => {
-        setFetching(true);
-        try {
-            const data = await getAllAdminCodes();
-            console.log("Fetching admin codes:", data);
-            if (!data || !Array.isArray(data)) {
-                setAdminCodes([]); // Fallback to an emptyAdminCodes array if the response is invalid
-                return;
-            }
-            setAdminCodes(data);
-        } catch (err) {
-            console.error("Fetch admin codes error:", err);
-            errorNotification("Something went wrong...", err.message || "Unable to fetch admin codes");
-        } finally {
-            setFetching(false);
-        }
-    };
-
-    useEffect(() => {
-        console.log("component is mounted");
-        fetchStudents().then(r => console.log(r));
-
-        if (userAuthorities.includes('ROLE_MASTER')) {
-            fetchAdminCodes().then(r => console.log(r));
-        }
-    }, []);
 
     const renderStudents = () => {
         console.log(students);
@@ -308,6 +337,26 @@ function MainLayout( {handleLogout} ) {
             rowKey={(student) => student.id}
         />;
     }
+
+    // Admin Codes //
+
+    const fetchAdminCodes = async () => {
+        setFetching(true);
+        try {
+            const data = await getAllAdminCodes();
+            console.log("Fetching admin codes:", data);
+            if (!data || !Array.isArray(data)) {
+                setAdminCodes([]); // Fallback to an emptyAdminCodes array if the response is invalid
+                return;
+            }
+            setAdminCodes(data);
+        } catch (err) {
+            console.error("Fetch admin codes error:", err);
+            errorNotification("Something went wrong...", err.message || "Unable to fetch admin codes");
+        } finally {
+            setFetching(false);
+        }
+    };
 
     const emptyAdminCodes = (adminCodes) => {
         if (adminCodes.length <=0){
@@ -371,44 +420,6 @@ function MainLayout( {handleLogout} ) {
             rowKey={(adminCode) => adminCode.id}
         />;
     }
-
-    const renderContent = () => {
-        switch (activeTab) {
-            case '1':
-                return renderStudents();
-            case '2':
-                return renderAdminCodes();
-            default:
-                return <div>Select a tab to view content.</div>;
-        }
-    }
-
-    const breadCrumbTitle = () => {
-        switch (activeTab) {
-            case '1':
-                return 'Students';
-            case '2':
-                return 'Admin Codes';
-            default:
-                return 'User';
-        }
-    }
-
-    const isMasterUser = userAuthorities.includes('ROLE_MASTER');
-
-    const menuItems = [
-        getItem('Students', '1', <UsergroupAddOutlined/>),
-        isMasterUser && getItem('Admin Codes', '2', <BarcodeOutlined/>),
-        getItem('User', 'sub1', <UserOutlined/>, [
-            getItem('Tom', '3'),
-            getItem('Bill', '4'),
-            getItem('Alex', '5'),
-        ]),
-        getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
-        getItem('Files', '9', <FileOutlined/>),
-    ].filter(Boolean);
-
-    console.log('MainLayout rendered')
 
     return (
         <Layout
