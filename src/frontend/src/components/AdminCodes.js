@@ -6,6 +6,7 @@ import ProgressSpin from "./Spin";
 import { deleteAdminCode, getAllAdminCodes, generateAdminCode } from "../client";
 import { errorNotification, successNotification } from "./Notification";
 
+
 const removeAdminCode = (id, callback) => {
     deleteAdminCode(id).then(() => {
         successNotification("Admin Code deleted", `Admin Code with id: ${id} has been deleted from the system`);
