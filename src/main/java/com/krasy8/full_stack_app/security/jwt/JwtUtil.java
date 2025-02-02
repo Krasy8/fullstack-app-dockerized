@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "YourSecretKeyHereYourSecretKeyHere";
+    private final String secretKey = System.getProperty("JWT_SECRET");
     private static final long EXPIRATION_TIME = 1000 * 60 * 60; // 1 hour
 
-    private final Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+    private final Key key = Keys.hmacShaKeyFor(secretKey.getBytes());
 
     // Generate the JWT token with authorities included
     public String generateToken(Authentication authentication) {

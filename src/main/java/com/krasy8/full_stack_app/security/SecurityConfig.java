@@ -26,10 +26,15 @@ public class SecurityConfig {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private PasswordConfig passwordConfig;
+
     @Autowired
     private JwtUtil jwtUtil;
+
+    private final String allowedOrigin = System.getProperty("ALLOWED_ORIGIN");
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,7 +42,7 @@ public class SecurityConfig {
         // CORS Configuration
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowCredentials(true);
-        corsConfig.addAllowedOrigin("http://localhost:3000/");
+        corsConfig.addAllowedOrigin(allowedOrigin);
 //        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

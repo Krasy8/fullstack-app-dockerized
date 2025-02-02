@@ -9,8 +9,11 @@ services:
     restart: always
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://full-stack-app-psql-cont:5432/fullstackapp
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      # Mount the .env file to the same directory path as in your application
+      - /Users/Krasy8/Projects/config/springboot-react-fullstack-app/.env:/app/config/.env
     networks:
       - full-stack-app-net
     depends_on:
@@ -21,8 +24,8 @@ services:
     container_name: full-stack-app-psql-cont
     environment:
       POSTGRES_DB: fullstackapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     networks:
       - full-stack-app-net
     ports:

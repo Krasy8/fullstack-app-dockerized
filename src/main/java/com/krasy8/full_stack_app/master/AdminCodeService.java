@@ -27,7 +27,6 @@ public class AdminCodeService {
 
     // Validate an admin code
     public Optional<AdminCode> validateAdminCode(String code) {
-//        String hashedCode = passwordEncoder.encode(code);
         return adminCodeRepository.findByCodeAndExpirationDateAfter(code, LocalDateTime.now());
     }
 
