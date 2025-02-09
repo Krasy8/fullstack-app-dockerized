@@ -22,9 +22,10 @@ const returnSpin = () => {
 }
 
 
-function AddNewStudent({fetchStudents}, students) {
+function AddNewStudent({fetchStudents, students}) {
     const [open, setOpen] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [destroyOnClose, setDestroyOnClose] = useState(false);
 
     const showDrawer = () => {
         setOpen(true);
@@ -34,26 +35,29 @@ function AddNewStudent({fetchStudents}, students) {
         setOpen(false);
     };
 
-    const onFinish = student => {
-        setSubmitting(true);
-        console.log(JSON.stringify(student, null, 2))
-        addNewStudent(student)
-            .then(() => {
-                console.log("new student added")
-                onClose();
-                successNotification(
-                    "New Student has been successfully added",
-                    `A new account for ${student.name} has been created on the system`)
-                fetchStudents();
-            }).catch(err => {
-                console.log(err);
-                err.response.json().then(res => {
-                    console.log(res)
-                    errorNotification("Something went wrong...",
-                        `${res.message} [${res.status}] [${res.error}]]`,
-                        "bottomLeft")
-                });
-            }).finally(() => setSubmitting(false));
+    const onFinish = async (student) => {
+        setSubmitting(true); // Indicate form submission state
+        console.log(JSON.stringify(student, null, 2));
+
+        try {
+            await addNewStudent(student)
+            console.log("New student added");
+
+            successNotification(
+                "New Student has been successfully added",
+                `A new account for ${student.username} has been created on the system`
+            );
+
+            onClose(); // Close the form or modal
+            fetchStudents(); // Refresh the students list
+            setDestroyOnClose(true); // Reset form behavior
+        } catch (err) {
+            console.error("Add student error:", err);
+            const errorMessage = err.message || "Unexpected error occurred";
+            errorNotification("Something went wrong...", errorMessage, "bottomLeft");
+        } finally {
+            setSubmitting(false); // Stop form submission state
+        }
     };
 
     const onFinishFailed = errorInfo => {
@@ -64,6 +68,7 @@ function AddNewStudent({fetchStudents}, students) {
         if (students.length <=0){
             return <Empty/>
         }
+        return null;
     }
 
     return (
@@ -84,6 +89,7 @@ function AddNewStudent({fetchStudents}, students) {
                 width={720}
                 onClose={onClose}
                 open={open}
+                destroyOnClose={destroyOnClose}
                 styles={{
                     body: {
                         paddingBottom: 80,
@@ -100,8 +106,8 @@ function AddNewStudent({fetchStudents}, students) {
                     <Row gutter={16}>
                         <Col span={24}>
                             <Form.Item
-                                name="name"
-                                label="Name"
+                                name="username"
+                                label="username"
                                 rules={[{
                                     required: true, message: 'Please enter user name',
                                 },]}

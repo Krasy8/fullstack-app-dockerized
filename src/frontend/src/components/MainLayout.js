@@ -1,33 +1,30 @@
 import React, {useState, useEffect} from 'react';
+import '../css/customCSS.css';
+import {jwtDecode} from "jwt-decode";
 import {
-    DesktopOutlined,
-    FileOutlined,
-    PieChartOutlined,
-    TeamOutlined,
+    BarcodeOutlined,
+    FileOutlined, TeamOutlined,
+    UsergroupAddOutlined,
     UserOutlined,
+    LogoutOutlined
 } from '@ant-design/icons';
 
 import {
     Breadcrumb,
     Layout,
     Menu,
-    Table,
     theme,
-    Empty,
-    Badge,
-    Tag,
-    Flex,
-    Avatar,
-    Radio, Popconfirm
+    Button
 } from 'antd';
 
-import ProgressSpin from "./Spin";
-import {deleteStudent, getAllStudents} from "../client";
-import AddStudent from "./AddNewStudent"
-import {errorNotification, successNotification} from "./Notification";
+import Students from "./Students";
+import AdminCodes from './AdminCodes';
 
 
-const {Header, Content, Footer, Sider} = Layout;
+const { Header,
+    Content,
+    Footer,
+    Sider} = Layout;
 
 function getItem(label, key, icon, children) {
     return {
@@ -38,157 +35,63 @@ function getItem(label, key, icon, children) {
     };
 }
 
-const items = [
-    getItem('Option 1', '1', <PieChartOutlined/>),
-    getItem('Option 2', '2', <DesktopOutlined/>),
-    getItem('User', 'sub1', <UserOutlined/>, [
-        getItem('Tom', '3'),
-        getItem('Bill', '4'),
-        getItem('Alex', '5'),
-    ]),
-    getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
-    getItem('Files', '9', <FileOutlined/>),
-];
+function MainLayout( {handleLogout} ) {
 
-const TheAvatar = ({name}) => {
-    let trim = name.trim();
-    if (trim.length === 0) {
-        return <Avatar icon={<UserOutlined/>}/>
-    }
-    const split = trim.split(" ");
-    if (split.length === 1) {
-        return <Avatar style={{
-            backgroundColor: '#fde3cf',
-            color: '#f56a00',
-        }}>
-            {name.charAt(0)}
-        </Avatar>
-    }
-    return <Avatar style={{
-        backgroundColor: '#fde3cf',
-        color: '#f56a00',
-    }}>
-        {`${name.charAt(0)}${name.charAt(name.length - 1)}`}
-    </Avatar>
-}
-
-const removeStudent = (studentId, callback) => {
-    deleteStudent(studentId).then(() => {
-        successNotification("Student deleted", `Student with id: ${studentId} has been deleted from the system`);
-        callback();
-    }).catch(err => {
-        console.log(err.response)
-        err.response.json().then(res => {
-            console.log(res)
-            errorNotification("Something went wrong...",
-                `${res.message} [${res.status}] [${res.error}]]`,
-                "bottomLeft"
-            )
-        });
-    })
-}
-
-const columns = fetchStudents => [
-    {
-        title: '',
-        dataIndex: 'avatar',
-        key: 'avatar',
-        render: (text, student) => <TheAvatar name={student.name}/>
-    },
-    {
-        title: 'Id',
-        dataIndex: 'id',
-        key: 'id',
-    },
-    {
-        title: 'Name',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: 'Email',
-        dataIndex: 'email',
-        key: 'email',
-    },
-    {
-        title: 'Gender',
-        dataIndex: 'gender',
-        key: 'gender',
-    },
-    {
-        title: 'Actions',
-        key: 'actions',
-        render: (text, student) =>
-            <Radio.Group>
-                <Popconfirm
-                    placement='topRight'
-                    title={`Are you sure to delete ${student.name}`}
-                    onConfirm={() => removeStudent(student.id, fetchStudents)}
-                    okText='Yes'
-                    cancelText='No'>
-                    <Radio.Button value="small">Delete</Radio.Button>
-                </Popconfirm>
-                <Radio.Button value="small">Edit</Radio.Button>
-            </Radio.Group>
-    }
-];
-
-
-function MainLayout() {
     const [collapsed, setCollapsed] = useState(false);
+    const [activeTab, setActiveTab] = useState('1'); // Track active tab
+    const [userAuthorities, setUserAuthorities] = useState([]);
     const {
         token: {colorBgContainer, borderRadiusLG},
     } = theme.useToken();
 
-    const [students, setStudents] = useState([]);
-    const [fetching, setFetching] = useState(true);
+    const isMasterUser = userAuthorities.includes('ROLE_MASTER');
 
-    const fetchStudents = () =>
-        getAllStudents()
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                setStudents(data);
-            }).catch(err => {
-            console.log(err.response)
-            err.response.json().then(res => {
-                console.log(res)
-                errorNotification("Something went wrong...",
-                    `${res.message()} [${res.status}] [${res.error}]]`
-                )
-            });
-        }).finally(() => setFetching(false));
+    const menuItems = [
+        getItem('Students', '1', <UsergroupAddOutlined/>),
+        isMasterUser && getItem('Admin Codes', '2', <BarcodeOutlined/>),
+        getItem('User', 'sub1', <UserOutlined/>, [
+            getItem('Tom', '3'),
+            getItem('Bill', '4'),
+            getItem('Alex', '5'),
+        ]),
+        getItem('Team', 'sub2', <TeamOutlined/>, [getItem('Team 1', '6'), getItem('Team 2', '8')]),
+        getItem('Files', '9', <FileOutlined/>),
+    ].filter(Boolean);
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case '1':
+                return <Students />//renderStudents();
+            case '2':
+                return <AdminCodes />//renderAdminCodes();
+            default:
+                return <div>Select a tab to view content.</div>;
+        }
+    }
+
+    const breadCrumbTitle = () => {
+        switch (activeTab) {
+            case '1':
+                return 'Students';
+            case '2':
+                return 'Admin Codes';
+            default:
+                return 'User';
+        }
+    }
 
     useEffect(() => {
-        console.log("component is mounted");
-        fetchStudents();
+        const jwtToken = localStorage.getItem('jwtToken');
+        if (jwtToken) {
+            const decodedJwt = jwtDecode(jwtToken);
+            console.log("user authorities from jwt: ", decodedJwt);
+            const authorities = decodedJwt.authorities;
+            setUserAuthorities(authorities || []);
+            console.log("user authorities after setting: ", userAuthorities);
+        }
     }, []);
 
-    const renderStudents = () => {
-        if (fetching) {
-            return <ProgressSpin/>;
-        }
-
-        return <Table
-            dataSource={students}
-            columns={columns(fetchStudents)}
-            bordered
-            title={() =>
-                <>
-                    <AddStudent fetchStudents={fetchStudents} students={students} />
-                    <Flex>
-                        <Tag>Number of students</Tag>
-                        <Badge count={students.length} showZero color="#52c41a"/>
-                    </Flex>
-                </>
-            }
-            pagination={{
-                pageSize: 50,
-            }}
-            scroll={{y: 500}}
-            rowKey={(student) => student.id}
-        />;
-    }
+    console.log('MainLayout rendered')
 
     return (
         <Layout
@@ -198,7 +101,13 @@ function MainLayout() {
         >
             <Sider collapsible collapsed={collapsed} onCollapse={(value) => setCollapsed(value)}>
                 <div className="demo-logo-vertical"/>
-                <Menu theme="dark" defaultSelectedKeys={['1']} mode="inline" items={items}/>
+                <Menu
+                    theme="dark"
+                    defaultSelectedKeys={['1']}
+                    mode="inline"
+                    items={menuItems}
+                    onClick={({key}) => setActiveTab(key)}
+                />
             </Sider>
             <Layout>
                 <Header
@@ -206,7 +115,18 @@ function MainLayout() {
                         padding: 0,
                         background: colorBgContainer,
                     }}
-                />
+                >
+                    <Button
+                        type="primary"
+                        danger
+                        shape="round"
+                        icon={<LogoutOutlined/>}
+                        onClick={handleLogout}
+                        style={{ float: 'right', margin: '16px' }}
+                    >
+                        Log Out
+                    </Button>
+                </Header>
                 <Content
                     style={{
                         margin: '0 16px',
@@ -216,10 +136,21 @@ function MainLayout() {
                         style={{
                             margin: '16px 0',
                         }}
-                    >
-                        <Breadcrumb.Item>User</Breadcrumb.Item>
-                        <Breadcrumb.Item>Students</Breadcrumb.Item>
-                    </Breadcrumb>
+                        items={[
+                            {
+                                title: breadCrumbTitle(),
+                            },
+                            // {
+                            //     title: <a href="">Application Center</a>,
+                            // },
+                            // {
+                            //     title: <a href="">Application List</a>,
+                            // },
+                            // {
+                            //     title: 'An Application',
+                            // },
+                        ]}
+                    />
                     <div
                         style={{
                             padding: 24,
@@ -228,7 +159,7 @@ function MainLayout() {
                             borderRadius: borderRadiusLG,
                         }}
                     >
-                        {renderStudents()}
+                        {renderContent()}
                     </div>
                 </Content>
                 <Footer

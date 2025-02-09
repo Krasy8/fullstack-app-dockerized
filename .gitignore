@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### db-data ###
+/db-data/
+
+.DS_Store
+.env

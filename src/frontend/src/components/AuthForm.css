@@ -1,0 +1,53 @@
+/* AuthForm.css */
+
+/* Background Image for the entire page */
+.auth-container {
+    /*background-image: url('https://images.wallpapersden.com/image/download/abstract-shapes-2021-minimalist_bG1lZm6UmZqaraWkpJRnamtlrWZpaWU.jpg'); !* Replace with your image URL *!*/
+    background-image: url('../images/login-bkgr-technology.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;   /* Prevents the image from repeating */
+    background-attachment: fixed;   /* Keeps the background fixed during scroll */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Form container with blur and transparency */
+.auth-box {
+    background: rgba(255, 255, 255, 0.2); /* Transparent background */
+    backdrop-filter: blur(10px); /* Blur effect */
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Additional form styles */
+.ant-form-item {
+    margin-bottom: 16px;
+}
+
+.ant-btn-block {
+    width: 100%;
+}
+
+/* Social login buttons (Google and Apple) */
+.auth-social-button {
+    width: 100%; /* Make the buttons full-width */
+    display: block; /* Ensure they behave like block elements */
+    margin-bottom: 10px; /* Add space between the buttons */
+}
+
+.auth-box .ant-tabs-nav {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.auth-box .ant-tabs-tab-btn {
+    font-weight: bold;
+    font-size: 16px;
+}

@@ -25,11 +25,19 @@ public class Student {
             generator = "student_sequence",
             strategy = GenerationType.SEQUENCE
     )
-    private Long id;
+    private Long studentId;
 
-    @NotBlank
-    @Column(nullable = false)
-    private String name;
+    @Column
+    private Long userId;
+
+    @Column
+    private String firstName;
+
+    @Column
+    private String lastName;
+
+    @Column
+    private String username;
 
     @Email
     @Column(unique = true)
@@ -40,9 +48,11 @@ public class Student {
     @Column(nullable = false)
     private Gender gender;
 
-
-    public Student(String name, String email, Gender gender) {
-        this.name = name;
+    public Student(Long userId, String firstName, String lastName, String username, String email, Gender gender) {
+        this.userId = userId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.username = username;
         this.email = email;
         this.gender = gender;
     }
