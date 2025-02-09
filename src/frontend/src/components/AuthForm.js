@@ -14,34 +14,70 @@ const AuthForm = ({ onLoginSuccess }) => {
 
     const {Option} = Select;
 
+    // const onLoginFinish = async (values) => {
+    //     console.log('Login values:', values);
+    //     try {
+    //         await loginAdmin(values);
+    //         message.success('Login successful');
+    //         onLoginSuccess(); // Call the success handler
+    //         // Redirect to the main page after successful login
+    //         navigate('/authorized');
+    //     } catch (error) {
+    //         console.log('Login failed:', error);
+    //         message.error('Login failed. Please check your credentials.');
+    //     }
+    // };
+
     const onLoginFinish = async (values) => {
         console.log('Login values:', values);
         try {
-            await loginAdmin(values);
+            const jwtToken = await loginAdmin(values);
+            if (!jwtToken) {
+                throw new Error('No token received');
+            }
+
             message.success('Login successful');
             onLoginSuccess(); // Call the success handler
-            // Redirect to the main page after successful login
-            navigate('/authorized');
+            navigate('/authorized'); // Redirect only if successful
         } catch (error) {
             console.log('Login failed:', error);
             message.error('Login failed. Please check your credentials.');
         }
     };
 
+    // const onRegisterFinish = async (values) => {
+    //     console.log('Register values:', values);
+    //     try {
+    //         await registerAdmin(values);
+    //         message.success('Registration successful! Redirecting...');
+    //         setTimeout(() => {
+    //             navigate('/authorized'); // Redirect to the main page
+    //         }, 1000);
+    //         registerForm.resetFields();
+    //     } catch (error) {
+    //         console.log('Registration failed:', error);
+    //         message.error('Registration failed. Please try again.');
+    //     }
+    // }
+
     const onRegisterFinish = async (values) => {
         console.log('Register values:', values);
         try {
-            await registerAdmin(values);
+            const jwtToken = await registerAdmin(values);
+            if (!jwtToken) {
+                throw new Error('No token received');
+            }
+
             message.success('Registration successful! Redirecting...');
             setTimeout(() => {
-                navigate('/authorized'); // Redirect to the main page
+                navigate('/authorized'); // Redirect only if successful
             }, 1000);
             registerForm.resetFields();
         } catch (error) {
             console.log('Registration failed:', error);
-            message.error('Registration failed. Please try again.');
+            message.error(error.message || 'Registration failed. Please try again.');
         }
-    }
+    };
 
     const handleGoogleLogin = () => {
         console.log('Google login clicked');

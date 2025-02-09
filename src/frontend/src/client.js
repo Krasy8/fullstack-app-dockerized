@@ -1,8 +1,11 @@
 import fetch from 'unfetch';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+console.log(process.env.REACT_APP_API_URL);
+console.log(API_BASE_URL);
 // Central call to fetch BE API
 const fetchApi = async (endpoint, options = {}) => {
-    const baseUrl = "http://localhost:8080/api/v1";
+    const baseUrl = `${API_BASE_URL}/api/v1`;
     const jwtToken = localStorage.getItem("jwtToken");
 
     if (!jwtToken) {
@@ -48,62 +51,57 @@ const fetchApi = async (endpoint, options = {}) => {
 // Admin API calls
 
 export const loginAdmin = async (credentials) => {
-    // const csrfToken = getCsrfToken();
-    // console.log(credentials, csrfToken);
-    return fetch("http://localhost:8080/api/v1/admin/login", { // Ensure the full backend URL
+    console.log(process.env.REACT_APP_API_URL);
+    console.log(API_BASE_URL);
+    return fetch(`${API_BASE_URL}/api/v1/admin/login`, {
         headers: {
             'Content-Type': 'application/json',
-            // 'X-XSRF-TOKEN': csrfToken // Include CSRF token
         },
         method: 'POST',
-        // credentials: 'include', // Include cookies for CSRF and session management
         body: JSON.stringify(credentials),
-    }).then(response => {
-        console.log('Response status:', response.status); // Log response status
-        console.log('Response OK:', response.ok); // Log if response is OK
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response OK:', response.ok);
 
-        // Check if the response is OK
-        if (response.ok) {
-            return response.text(); // Response is plain text (JWT token)
-        } else {
-            return response.text().then(text => {
-                console.error('Login failed:', text); // Log error text from the response
-                throw new Error('Login failed');
-            });
-        }
-    }).then(async jwtToken => {
-        localStorage.setItem('jwtToken', await jwtToken);
-    }).catch(error => {
-        console.error('Login error', error);
-    });
+            if (!response.ok) {
+                return response.text().then(text => {
+                    console.error('Login failed:', text);
+                    throw new Error(text || 'Login failed');
+                });
+            }
+            return response.text(); // Assuming JWT token is returned as plain text
+        })
+        .then(jwtToken => {
+            localStorage.setItem('jwtToken', jwtToken);
+            return jwtToken; // Return token to indicate success
+        });
 };
 
 export const registerAdmin = async (adminData) => {
-    return fetch("http://localhost:8080/api/v1/admin/register", {
+    return fetch(`${API_BASE_URL}/api/v1/admin/register`, {
         headers: {
             'Content-Type': 'application/json',
         },
         method: 'POST',
-        body: JSON.stringify(adminData)
-        // }).then(checkStatus);
-    }).then(response => {
-        console.log('Response status:', response.status); // Log response status
-        console.log('Response OK:', response.ok); // Log if response is OK
+        body: JSON.stringify(adminData),
+    })
+        .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response OK:', response.ok);
 
-        // Check if the response is OK
-        if (response.ok) {
-            return response.text(); // Response is plain text (JWT token)
-        } else {
-            return response.text().then(text => {
-                console.error('Registration failed:', text); // Log error text from the response
-                throw new Error('Registration failed');
-            });
-        }
-    }).then(async jwtToken => {
-        localStorage.setItem('jwtToken', await jwtToken);
-    }).catch(error => {
-        console.error('Registration error', error);
-    });
+            if (!response.ok) {
+                return response.text().then(text => {
+                    console.error('Registration failed:', text);
+                    throw new Error(text || 'Registration failed');
+                });
+            }
+            return response.text(); // Assuming success returns a token or confirmation message
+        })
+        .then(message => {
+            // localStorage.setItem('jwtToken', jwtToken);
+            return message; // Return token to indicate success
+        });
 };
 
 

@@ -43,6 +43,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowCredentials(true);
         corsConfig.addAllowedOrigin(allowedOrigin);
+        corsConfig.addAllowedOrigin("http://0.0.0.0:8080");
 //        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -64,9 +65,17 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/authenticating").permitAll()
-                                .requestMatchers("/api/v1/admin/**").permitAll() //
-                                .requestMatchers("/api/v1/csrf/**").permitAll()
+                                .requestMatchers("/",
+                                        "/authenticating",
+                                        "/static/**",
+                                        "/favicon.ico",
+                                        "/index.html",
+                                        "/manifest.json",
+                                        "/logo192.png",
+                                        "/logo.512.png",
+                                        "/asset-manifest.json",
+//                                        "/api/v1/csrf/**",
+                                        "/api/v1/admin/**").permitAll()
                                 .requestMatchers("/api/v1/students/**").hasAnyAuthority("ROLE_MASTER", "ROLE_ADMIN")
                                 .requestMatchers("/api/v1/master/**").hasAnyAuthority("ROLE_MASTER")
                 )
