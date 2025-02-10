@@ -42,7 +42,7 @@ nginx.
 4. Jib build command needs to be run with some parameters:
    - build type referring to the profile (eg. ```-P jib-push-to-dockerhub```)
    - docker image tag (eg. ```-Dapp.image.tag=v10-arm64```)
-   - arch type (eg. ```-Djib.from.platforms=linux/arm64```)
+   - arcch type (eg. ```-Djib.from.platforms=linux/arm64```)
 
     example:
     ```shell
