@@ -1,5 +1,7 @@
 package com.krasy8.full_stack_app.master;
 
+import com.krasy8.full_stack_app.user.User;
+import com.krasy8.full_stack_app.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +15,12 @@ import java.util.List;
 public class MasterController {
 
     private final AdminCodeService adminCodeService;
+    private final UserService userService;
 
     @Autowired
-    public MasterController(AdminCodeService adminCodeService) {
+    public MasterController(AdminCodeService adminCodeService, UserService userService) {
         this.adminCodeService = adminCodeService;
+        this.userService = userService;
     }
 
     @GetMapping("/admin-codes")
@@ -40,5 +44,17 @@ public class MasterController {
     @PreAuthorize("hasRole('MASTER')")
     public void deleteAdminCode(@PathVariable("id") long id) {
         adminCodeService.deleteAdminCode(id);
+    }
+
+    @GetMapping("/get-users")
+    @PreAuthorize("hasRole('MASTER')")
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @DeleteMapping("/delete-user/{id}")
+    @PreAuthorize("hasRole('MASTER')")
+    public void deleteUser(@PathVariable("id") long id) {
+        userService.deleteUser(id);
     }
 }

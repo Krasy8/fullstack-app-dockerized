@@ -4,9 +4,8 @@ import {jwtDecode} from "jwt-decode";
 import {
     BarcodeOutlined,
     FileOutlined, TeamOutlined,
-    UsergroupAddOutlined,
     UserOutlined,
-    LogoutOutlined
+    LogoutOutlined, ContactsOutlined
 } from '@ant-design/icons';
 
 import {
@@ -19,6 +18,7 @@ import {
 
 import Students from "./Students";
 import AdminCodes from './AdminCodes';
+import Users from "./Users";
 
 
 const { Header,
@@ -47,8 +47,9 @@ function MainLayout( {handleLogout} ) {
     const isMasterUser = userAuthorities.includes('ROLE_MASTER');
 
     const menuItems = [
-        getItem('Students', '1', <UsergroupAddOutlined/>),
+        getItem('Students', '1', <ContactsOutlined />),
         isMasterUser && getItem('Admin Codes', '2', <BarcodeOutlined/>),
+        isMasterUser && getItem('Users', '3', <TeamOutlined/>),
         getItem('User', 'sub1', <UserOutlined/>, [
             getItem('Tom', '3'),
             getItem('Bill', '4'),
@@ -61,9 +62,11 @@ function MainLayout( {handleLogout} ) {
     const renderContent = () => {
         switch (activeTab) {
             case '1':
-                return <Students />//renderStudents();
+                return <Students />
             case '2':
-                return <AdminCodes />//renderAdminCodes();
+                return <AdminCodes />
+            case '3':
+                return <Users />
             default:
                 return <div>Select a tab to view content.</div>;
         }
@@ -75,6 +78,8 @@ function MainLayout( {handleLogout} ) {
                 return 'Students';
             case '2':
                 return 'Admin Codes';
+            case '3':
+                return 'Users'
             default:
                 return 'User';
         }

@@ -173,6 +173,27 @@ export const deleteAdminCode = async (id) => {
     }
 };
 
+export const getAllUsers = async () => {
+    try {
+        return await fetchApi("/master/get-users", {method: "GET"});
+    } catch (error) {
+        console.error("Failed to fetch users: ", error.message);
+        throw error;
+    }
+};
+
+export const deleteUser = async (id) => {
+    try {
+        return await fetchApi(`/master/delete-user/${id}`, {
+            method: "DELETE",
+            body: JSON.stringify(id)
+        });
+    } catch (error) {
+        console.error(`Failed to delete the user id: ${id}`, error.message);
+        throw error;
+    }
+};
+
 
     // Not in use:
 

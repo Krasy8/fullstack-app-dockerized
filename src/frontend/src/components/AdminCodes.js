@@ -1,4 +1,3 @@
-// AdminCodes.js
 import React, { useState, useEffect } from 'react';
 import { Button, Table, Tag, Badge, Empty, Radio, Popconfirm } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
