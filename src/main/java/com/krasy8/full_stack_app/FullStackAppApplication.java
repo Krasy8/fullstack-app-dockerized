@@ -21,9 +21,9 @@ public class FullStackAppApplication {
 		// Load the .env file
 		Dotenv dotenv = Dotenv.configure()
 				//local testing
-//				.directory("/Users/Krasy8/Projects/config/springboot-react-fullstack-app/")
+				.directory("/Users/Krasy8/Projects/config/springboot-react-fullstack-app/")
 				//pushing to docker
-				.directory("/app/config/")
+//				.directory("/app/config/")
 				.filename(".env")
 				.load();
 

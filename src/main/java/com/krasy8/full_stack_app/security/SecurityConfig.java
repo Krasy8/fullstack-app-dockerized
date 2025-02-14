@@ -43,7 +43,6 @@ public class SecurityConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
         corsConfig.setAllowCredentials(true);
         corsConfig.addAllowedOrigin(allowedOrigin);
-        corsConfig.addAllowedOrigin("http://0.0.0.0:8080");
 //        corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-XSRF-TOKEN"));
         corsConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type"));
         corsConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));

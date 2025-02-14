@@ -1,6 +1,6 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import {BrowserRouter as Router, Routes, Route, Navigate, useNavigate} from "react-router-dom";
+import {BrowserRouter as Router, Routes, Route, Navigate} from "react-router-dom";
 
 import MainLayout from "./components/MainLayout";
 import AuthForm from "./components/AuthForm";
@@ -10,9 +10,6 @@ function App() {
         return localStorage.getItem('isAuthenticated') === 'true';
     });
 
-    const [isJwtTokenPresent, setIsJwtTokenPresent] = useState(() => {
-        return localStorage.getItem('jwtToken') != null;
-    });
     const handleLoginSuccess = () => {
         setIsAuthenticated(true);
     }
@@ -22,7 +19,7 @@ function App() {
         setIsAuthenticated(false);
         localStorage.setItem('jwtToken', '');
         localStorage.removeItem('jwtToken');
-        setIsJwtTokenPresent(false);
+        // setIsJwtTokenPresent(false);
     }
 
     // useEffect to monitor state changes and log them
@@ -31,9 +28,6 @@ function App() {
         console.log('Is authenticated:', isAuthenticated);
     }, [isAuthenticated]); // This will log the correct value whenever isAuthenticated changes
 
-    useEffect(() => {
-        console.log('Is JWT present:', isJwtTokenPresent);
-    }, [isJwtTokenPresent]);
 
     return (
         <Router>

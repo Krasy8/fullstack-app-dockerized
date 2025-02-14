@@ -1,8 +1,8 @@
 import fetch from 'unfetch';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL;
-console.log(process.env.REACT_APP_API_URL);
 console.log(API_BASE_URL);
+
 // Central call to fetch BE API
 const fetchApi = async (endpoint, options = {}) => {
     const baseUrl = `${API_BASE_URL}/api/v1`;
