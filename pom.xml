@@ -312,6 +312,75 @@
 				</plugins>
 			</build>
 		</profile>
+		<!-- testing faze, the below is to build FE separately as independent container -->
+		<profile>
+			<id>jib-react-frontend</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>com.google.cloud.tools</groupId>
+						<artifactId>jib-maven-plugin</artifactId>
+						<version>3.3.1</version>
+						<configuration>
+							<from>
+								<image>node:20-alpine</image>
+							</from>
+							<container>
+								<ports>
+									<port>3000</port>
+								</ports>
+								<workingDirectory>/app</workingDirectory>
+								<entrypoint>["npm", "run", "start"]</entrypoint>
+							</container>
+							<extraDirectories>
+								<paths>
+									<path>src/frontend/build</path>
+								</paths>
+							</extraDirectories>
+						</configuration>
+						<executions>
+							<!-- Push to Docker Hub -->
+							<execution>
+								<id>push-to-dockerhub</id>
+								<phase>package</phase>
+								<configuration>
+									<to>
+										<image>docker.io/krasy8/react-frontend</image>
+										<tags>
+											<tag>latest</tag>
+											<tag>${app.image.tag}</tag> <!-- Replace ${app.image.tag} with the desired version -->
+										</tags>
+									</to>
+								</configuration>
+								<goals>
+									<goal>build</goal>
+								</goals>
+							</execution>
+							<!-- Push to Local Docker -->
+							<execution>
+								<id>push-to-local</id>
+								<phase>package</phase>
+								<configuration>
+									<to>
+										<image>krasy8/react-frontend</image>
+										<tags>
+											<tag>latest</tag>
+											<tag>${app.image.tag}</tag> <!-- Replace ${app.image.tag} with the desired version -->
+										</tags>
+									</to>
+								</configuration>
+								<goals>
+									<goal>dockerBuild</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 
 </project>
